@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model TradeAttempt {
+  id                         String   @id @default(cuid())
+  privyUserId                String
+  eoaAddress                 String
+  safeAddress                String
+
+  marketId                   String?
+  tokenId                    String
+  outcome                    String?
+  negRisk                    Boolean
+
+  totalAmountUsdcMicros      BigInt
+  feeRateBps                 Int
+  feeAmountUsdcMicros        BigInt
+  orderAmountUsdcMicros      BigInt
+  slippageBps                Int
+  bestAsk                    Decimal?
+  worstPrice                 Decimal
+  tickSize                   Decimal
+  estimatedShares            Decimal?
+
+  status                     String
+
+  feeWallet                  String
+  feeTxHash                  String?
+  feeCollectedAt             DateTime?
+  feeRetainedAt              DateTime?
+
+  polymarketOrderId          String?
+  clientOrderResponseJson    Json?
+  clientOrderErrorJson       Json?
+  clientReportedStatus       String?
+  clientReportedAt           DateTime?
+
+  refundTxHash               String?
+  refundedAt                 DateTime?
+
+  quoteSnapshotJson          Json
+  errorMessage               String?
+
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+
+  @@index([privyUserId, status])
+  @@index([safeAddress])
+  @@index([feeTxHash])
+  @@index([polymarketOrderId])
+}
