@@ -41,7 +41,7 @@ export default function WalletInfo({
           </div>
         </div>
 
-        {/* Safe Wallet */}
+        {/* Display-only Safe address */}
         {derivedSafeAddressFromEoa && (
           <div className="flex flex-col sm:flex-row items-center gap-3 justify-between">
             <div className="flex items-center gap-2">

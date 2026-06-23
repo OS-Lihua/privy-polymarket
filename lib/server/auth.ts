@@ -9,7 +9,6 @@ import { polygon } from "viem/chains";
 import { PrivyClient } from "@privy-io/server-auth";
 import {
   deriveBeaconDepositWallet,
-  deriveSafe,
   deriveUupsDepositWallet,
 } from "@polymarket/builder-relayer-client/dist/builder/derive";
 import { getContractConfig } from "@polymarket/builder-relayer-client/dist/config";
@@ -22,7 +21,7 @@ type AuthContext = {
 
 type OwnershipInput = {
   eoaAddress: string;
-  safeAddress: string;
+  depositWalletAddress: string;
 };
 
 let privyClient: PrivyClient | null = null;
@@ -48,35 +47,13 @@ export async function requirePrivyAuth(request: NextRequest): Promise<AuthContex
   };
 }
 
-export async function verifySafeOwnership(input: OwnershipInput) {
-  if (!isAddress(input.eoaAddress) || !isAddress(input.safeAddress)) {
-    throw new Error("Invalid EOA or Safe address");
-  }
-
-  const eoaAddress = getAddress(input.eoaAddress);
-  const safeAddress = getAddress(input.safeAddress);
-  const config = getContractConfig(POLYGON_CHAIN_ID);
-  const derivedSafe = getAddress(
-    deriveSafe(eoaAddress, config.SafeContracts.SafeFactory)
-  );
-
-  if (derivedSafe !== safeAddress) {
-    throw new Error("Safe address does not match the submitted EOA");
-  }
-
-  return {
-    eoaAddress,
-    safeAddress,
-  };
-}
-
 export async function verifyDepositWalletOwnership(input: OwnershipInput) {
-  if (!isAddress(input.eoaAddress) || !isAddress(input.safeAddress)) {
+  if (!isAddress(input.eoaAddress) || !isAddress(input.depositWalletAddress)) {
     throw new Error("Invalid EOA or trading wallet address");
   }
 
   const eoaAddress = getAddress(input.eoaAddress);
-  const tradingWalletAddress = getAddress(input.safeAddress);
+  const tradingWalletAddress = getAddress(input.depositWalletAddress);
   const config = getContractConfig(POLYGON_CHAIN_ID).DepositWalletContracts;
   const derivedUupsWallet = getAddress(
     deriveUupsDepositWallet(
@@ -93,7 +70,7 @@ export async function verifyDepositWalletOwnership(input: OwnershipInput) {
     if (derivedUupsWallet !== tradingWalletAddress) {
       throw new Error("Trading wallet does not match the submitted EOA");
     }
-    return { eoaAddress, safeAddress: tradingWalletAddress };
+    return { eoaAddress, depositWalletAddress: tradingWalletAddress };
   }
 
   const isUupsWalletDeployed = await isContractDeployed(derivedUupsWallet);
@@ -111,7 +88,7 @@ export async function verifyDepositWalletOwnership(input: OwnershipInput) {
     throw new Error("Trading wallet does not match the submitted EOA");
   }
 
-  return { eoaAddress, safeAddress: tradingWalletAddress };
+  return { eoaAddress, depositWalletAddress: tradingWalletAddress };
 }
 
 const FACTORY_BEACON_SELECTOR = "0x49493a4d" as const;

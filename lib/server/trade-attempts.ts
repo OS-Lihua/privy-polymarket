@@ -6,7 +6,19 @@ export function isTerminalStatus(status: string) {
 }
 
 export function canCancelAttempt(attempt: TradeAttempt) {
-  return attempt.status === "created" || attempt.status === "fee_pending";
+  return [
+    "created",
+    "fee_pending",
+    "fee_submitted",
+    "fee_verified",
+    "order_pending",
+  ].includes(attempt.status);
+}
+
+export function requiresRefundOnCancel(attempt: TradeAttempt) {
+  return ["fee_submitted", "fee_verified", "order_pending"].includes(
+    attempt.status
+  );
 }
 
 export function classifyClientOrderResult(body: {

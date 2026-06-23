@@ -1,7 +1,4 @@
-import {
-  OperationType,
-  SafeTransaction,
-} from "@polymarket/builder-relayer-client";
+import type { DepositWalletCall } from "@polymarket/builder-relayer-client";
 import { encodeFunctionData } from "viem";
 import {
   USDC_E_CONTRACT_ADDRESS,
@@ -44,7 +41,7 @@ export interface RedeemParams {
   size?: number;
 }
 
-export const createRedeemTx = (params: RedeemParams): SafeTransaction => {
+export const createRedeemCall = (params: RedeemParams): DepositWalletCall => {
   const { conditionId, outcomeIndex, negativeRisk = false, size = 0 } = params;
 
   if (negativeRisk) {
@@ -68,8 +65,7 @@ export const createRedeemTx = (params: RedeemParams): SafeTransaction => {
     });
 
     return {
-      to: NEG_RISK_ADAPTER_ADDRESS,
-      operation: OperationType.Call,
+      target: NEG_RISK_ADAPTER_ADDRESS,
       data,
       value: "0",
     };
@@ -97,8 +93,7 @@ export const createRedeemTx = (params: RedeemParams): SafeTransaction => {
   });
 
   return {
-    to: CTF_CONTRACT_ADDRESS,
-    operation: OperationType.Call,
+    target: CTF_CONTRACT_ADDRESS,
     data,
     value: "0",
   };

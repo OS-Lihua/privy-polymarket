@@ -1,13 +1,31 @@
 import { describe, expect, it } from "vitest";
-import { canCancelAttempt, classifyClientOrderResult } from "@/lib/server/trade-attempts";
-import { BLOCKING_ATTEMPT_STATUSES } from "@/lib/server/config";
+import {
+  canCancelAttempt,
+  classifyClientOrderResult,
+  isTerminalStatus,
+  requiresRefundOnCancel,
+} from "@/lib/server/trade-attempts";
+import {
+  BLOCKING_ATTEMPT_STATUSES,
+  TERMINAL_ATTEMPT_STATUSES,
+} from "@/lib/server/config";
 
 describe("trade attempt state helpers", () => {
-  it("only allows cancellation before fee submission", () => {
+  it("allows cancellation until an order is filled", () => {
     expect(canCancelAttempt({ status: "created" } as any)).toBe(true);
     expect(canCancelAttempt({ status: "fee_pending" } as any)).toBe(true);
-    expect(canCancelAttempt({ status: "fee_submitted" } as any)).toBe(false);
-    expect(canCancelAttempt({ status: "fee_verified" } as any)).toBe(false);
+    expect(canCancelAttempt({ status: "fee_submitted" } as any)).toBe(true);
+    expect(canCancelAttempt({ status: "fee_verified" } as any)).toBe(true);
+    expect(canCancelAttempt({ status: "order_pending" } as any)).toBe(true);
+    expect(canCancelAttempt({ status: "order_filled" } as any)).toBe(false);
+  });
+
+  it("requires refund when cancelling after fee submission", () => {
+    expect(requiresRefundOnCancel({ status: "created" } as any)).toBe(false);
+    expect(requiresRefundOnCancel({ status: "fee_pending" } as any)).toBe(false);
+    expect(requiresRefundOnCancel({ status: "fee_submitted" } as any)).toBe(true);
+    expect(requiresRefundOnCancel({ status: "fee_verified" } as any)).toBe(true);
+    expect(requiresRefundOnCancel({ status: "order_pending" } as any)).toBe(true);
   });
 
   it("treats order ids as filled", () => {
@@ -66,5 +84,21 @@ describe("trade attempt state helpers", () => {
       "order_failed_refund_pending" as any
     );
     expect(BLOCKING_ATTEMPT_STATUSES).not.toContain("refund_pending" as any);
+    expect(BLOCKING_ATTEMPT_STATUSES).not.toContain(
+      "refund_pending_review" as any
+    );
+    expect(BLOCKING_ATTEMPT_STATUSES).not.toContain(
+      "refund_too_small_review" as any
+    );
+  });
+
+  it("keeps manual refund review statuses visible to admins", () => {
+    expect(TERMINAL_ATTEMPT_STATUSES).not.toContain(
+      "refund_pending_review" as any
+    );
+    expect(TERMINAL_ATTEMPT_STATUSES).not.toContain(
+      "refund_too_small_review" as any
+    );
+    expect(isTerminalStatus("refund_pending_review")).toBe(false);
   });
 });

@@ -217,7 +217,7 @@ export async function POST(request: NextRequest) {
 
 **File**: `hooks/useRelayClient.ts`
 
-The **RelayClient** is initialized with the user's Privy EOA signer and builder config. It's used for Safe deployment, token approvals, and CTF operations.
+The **RelayClient** is initialized with the user's Privy EOA signer and builder config. It's used for Deposit Wallet deployment, token approvals, transfers, wrapping, and CTF operations.
 
 ```typescript
 import { RelayClient } from "@polymarket/builder-relayer-client";
@@ -242,42 +242,18 @@ const relayClient = new RelayClient(
 
 - Requires user's EOA signer (from Privy via WalletProvider)
 - Requires builder's config for authentication
-- Used for Safe deployment and approvals
+- Used for Deposit Wallet deployment and approvals
 - Persisted throughout trading session
 
 ---
 
-### 4. Safe Deployment
+### 4. Deposit Wallet Setup
 
-**File**: `hooks/useSafeDeployment.ts`
+**Files**: `hooks/useDepositWallet.ts`, `hooks/useTradingSession.ts`
 
-The Safe address is deterministically derived from the user's Privy EOA, then deployed if it doesn't exist.
+The Deposit Wallet address is derived from the user's Privy EOA via the Polymarket relayer client. The session flow deploys it if needed, then uses it for token approvals, balances, transfers, and CLOB V2 order funding.
 
-```typescript
-import { deriveSafe } from "@polymarket/builder-relayer-client/dist/builder/derive";
-import { getContractConfig } from "@polymarket/builder-relayer-client/dist/config";
-
-// Step 1: Derive Safe address (deterministic)
-const config = getContractConfig(137); // Polygon
-const safeAddress = deriveSafe(eoaAddress, config.SafeContracts.SafeFactory);
-
-// Step 2: Check if Safe is deployed
-const deployed = await relayClient.getDeployed(safeAddress);
-
-// Step 3: Deploy Safe if needed (Privy handles signature)
-if (!deployed) {
-  const response = await relayClient.deploy();
-  const result = await response.wait();
-  console.log("Safe deployed at:", result.proxyAddress);
-}
-```
-
-**Important:**
-
-- Safe address is **deterministic** - same EOA always gets same Safe address
-- Safe is the "funder" address that holds USDC.e and outcome tokens
-- One-time deployment per EOA on user's first login
-- Privy handles the signature request
+The legacy Safe address may still be displayed in the UI for demo comparison, but it is not deployed, funded, or used for trading.
 
 ---
 
@@ -352,23 +328,23 @@ Before trading, the Safe must approve **multiple contracts** to spend USDC.e and
 #### Implementation
 
 ```typescript
-import { createAllApprovalTxs, checkAllApprovals } from "@/utils/approvals";
+import { createAllApprovalCalls, checkAllApprovals } from "@/utils/approvals";
 
 // Step 1: Check existing approvals
-const approvalStatus = await checkAllApprovals(safeAddress);
+const approvalStatus = await checkAllApprovals(depositWalletAddress);
 
 if (approvalStatus.allApproved) {
   console.log("All approvals already set");
   // Skip approval step
 } else {
   // Step 2: Create approval transactions
-  const approvalTxs = createAllApprovalTxs();
-  // Returns array of SafeTransaction objects
+  const approvalCalls = createAllApprovalCalls();
 
-  // Step 3: Execute all approvals in a single batch
-  const response = await relayClient.execute(
-    approvalTxs,
-    "Set all token approvals for trading"
+  // Step 3: Execute all approvals through the Deposit Wallet
+  const response = await relayClient.executeDepositWalletBatch(
+    approvalCalls,
+    depositWalletAddress,
+    deadline
   );
 
   await response.wait();
@@ -376,15 +352,14 @@ if (approvalStatus.allApproved) {
 }
 ```
 
-#### Approval Transaction Structure
+#### Approval Call Structure
 
-Each approval transaction is a `SafeTransaction`:
+Each approval is executed as a Deposit Wallet call:
 
 ```typescript
 // ERC-20 approval (USDC.e)
 {
-  to: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174', // USDC.e address
-  operation: OperationType.Call,
+  target: '0xC011a7E12a19f7B1f670d46F03B03f3342E82DFB', // pUSD address
   data: erc20Interface.encodeFunctionData('approve', [
     spenderAddress,
     MAX_UINT256 // Unlimited approval
@@ -394,8 +369,7 @@ Each approval transaction is a `SafeTransaction`:
 
 // ERC-1155 approval (outcome tokens)
 {
-  to: '0x4d97dcd97ec945f40cf65f87097ace5ea0476045', // CTF Contract address
-  operation: OperationType.Call,
+  target: '0x4d97dcd97ec945f40cf65f87097ace5ea0476045', // CTF Contract address
   data: erc1155Interface.encodeFunctionData('setApprovalForAll', [
     operatorAddress,
     true // Enable operator
@@ -430,7 +404,7 @@ const allowance = await publicClient.readContract({
   address: USDC_E_ADDRESS,
   abi: ERC20_ABI,
   functionName: "allowance",
-  args: [safeAddress, spenderAddress],
+  args: [depositWalletAddress, spenderAddress],
 });
 
 const isApproved = allowance >= threshold; // 1000000000000 (1M USDC.e)
@@ -440,16 +414,16 @@ const isApprovedForAll = await publicClient.readContract({
   address: CTF_CONTRACT_ADDRESS,
   abi: ERC1155_ABI,
   functionName: "isApprovedForAll",
-  args: [safeAddress, operatorAddress],
+  args: [depositWalletAddress, operatorAddress],
 });
 ```
 
 **Key Points:**
 
-- Uses **batch execution** via `relayClient.execute()` for gas efficiency
+- Uses **Deposit Wallet batch execution** via `relayClient.executeDepositWalletBatch()`
 - Sets **unlimited approvals** (MaxUint256) for ERC-20 tokens
 - Sets **operator approvals** for ERC-1155 outcome tokens
-- One-time setup per Safe (persists across sessions)
+- One-time setup per Deposit Wallet (persists across sessions)
 - User signs once to approve all transactions (Privy handles signature)
 - Gasless for the user
 
@@ -477,7 +451,7 @@ const clobClient = new ClobClient(
   signer,
   userApiCredentials, // { key, secret, passphrase }
   2, // signatureType = 2 for EOA associated to a Gnosis Safe proxy wallet
-  safeAddress, // funder address from step 4
+  depositWalletAddress, // Deposit Wallet funder address
   undefined, // mandatory placeholder
   false,
   builderConfig // Builder order attribution
@@ -488,8 +462,8 @@ const clobClient = new ClobClient(
 
 - **signer**: EOA signer from Privy (via WalletProvider)
 - **userApiCredentials**: Obtained from Step 5
-- **signatureType = 2**: Type indicating EOA associated to a Gnosis Safe proxy wallet
-- **safeAddress**: The Safe proxy wallet address that holds funds
+- **signatureType**: Signature mode used for the Deposit Wallet funder
+- **depositWalletAddress**: The Deposit Wallet address that holds trading funds
 - **builderConfig**: Enables order attribution
 
 **This is the persistent client used for all trading operations.**
@@ -555,7 +529,7 @@ polymarket-privy-safe/
 ├── hooks/
 │   ├── useTradingSession.ts              # Session orchestration (main flow)
 │   ├── useRelayClient.ts                 # RelayClient initialization
-│   ├── useSafeDeployment.ts              # Safe deployment logic
+│   ├── useSafeDeployment.ts              # Display-only Safe address derivation
 │   ├── useUserApiCredentials.ts          # User API credential derivation
 │   ├── useTokenApprovals.ts              # Token approval management
 │   ├── useClobClient.ts                  # Authenticated CLOB client
@@ -628,7 +602,7 @@ POLYMARKET_BUILDER_PASSPHRASE=your_builder_passphrase
 | -------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------ |
 | [`@privy-io/react-auth`](https://docs.privy.io/)                                                         | ^2.12.2  | Authentication / Embedded Wallet                 |
 | [`@polymarket/clob-client`](https://github.com/Polymarket/clob-client)                                   | ^4.22.8  | Order placement, User API credentials            |
-| [`@polymarket/builder-relayer-client`](https://www.npmjs.com/package/@polymarket/builder-relayer-client) | ^0.0.6   | Safe deployment, token approvals, CTF operations |
+| [`@polymarket/builder-relayer-client`](https://www.npmjs.com/package/@polymarket/builder-relayer-client) | ^0.0.6   | Deposit Wallet transactions, token approvals, CTF operations |
 | [`@polymarket/builder-signing-sdk`](https://www.npmjs.com/package/@polymarket/builder-signing-sdk)       | ^0.0.8   | Builder credential HMAC signatures               |
 | [`viem`](https://viem.sh/)                                                                               | ^2.39.2  | Ethereum interactions, RPC calls                 |
 | [`ethers`](https://docs.ethers.org/v5/)                                                                  | ^5.8.0   | Wallet signing, EIP-712 messages                 |
@@ -689,11 +663,11 @@ User (email/social login)
 - Verify `/api/polymarket/sign` endpoint is accessible
 - Check browser console for errors
 
-### "Safe deployment failed"
+### "Deposit Wallet deployment failed"
 
 - Check Polygon RPC URL is valid
 - User must approve signature via Privy
-- Verify builder credentials are configured correctly
+- Verify per-user builder credentials are configured correctly
 - Check browser console for relay service errors
 
 ### "Token approval failed"

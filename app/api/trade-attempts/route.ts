@@ -30,9 +30,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Quote has expired" }, { status: 400 });
     }
 
-    const { eoaAddress, safeAddress } = await verifyDepositWalletOwnership({
+    const { eoaAddress, depositWalletAddress } =
+      await verifyDepositWalletOwnership({
       eoaAddress: String(quote.eoaAddress || ""),
-      safeAddress: String(quote.safeAddress || ""),
+      depositWalletAddress: String(
+        quote.depositWalletAddress || quote.safeAddress || ""
+      ),
     });
 
     logger.info({
@@ -41,14 +44,14 @@ export async function POST(request: NextRequest) {
       quoteId: quote.quoteId,
       privyUserId: auth.privyUserId,
       eoaAddress,
-      safeAddress,
+      depositWalletAddress,
       tokenId: quote.tokenId,
     });
 
     const activeAttempt = await prisma.tradeAttempt.findFirst({
       where: {
         privyUserId: auth.privyUserId,
-        safeAddress,
+        depositWalletAddress,
         status: { in: [...BLOCKING_ATTEMPT_STATUSES] },
       },
       orderBy: { createdAt: "desc" },
@@ -60,7 +63,7 @@ export async function POST(request: NextRequest) {
         traceId,
         activeAttemptId: activeAttempt.id,
         activeAttemptStatus: activeAttempt.status,
-        safeAddress,
+        depositWalletAddress,
       });
       return NextResponse.json(
         { error: "Active trade attempt already exists", attempt: serializeAttempt(activeAttempt) },
@@ -70,13 +73,13 @@ export async function POST(request: NextRequest) {
 
     const feeConfig = getFeeConfig();
     const totalAmountUsdcMicros = BigInt(String(quote.totalAmountUsdcMicros));
-    const safeBalance = await getUsdcBalance(safeAddress);
+    const safeBalance = await getUsdcBalance(depositWalletAddress);
 
     if (safeBalance < totalAmountUsdcMicros) {
       logger.warn({
         event: "api_attempt_insufficient_balance",
         traceId,
-        safeAddress,
+        depositWalletAddress,
         safeBalance: safeBalance.toString(),
         totalAmountUsdcMicros: totalAmountUsdcMicros.toString(),
       });
@@ -88,7 +91,7 @@ export async function POST(request: NextRequest) {
 
     const orderAmountUsdcMicros = BigInt(String(quote.orderAmountUsdcMicros));
     const adapterAllowance = await getUsdcAllowance(
-      safeAddress,
+      depositWalletAddress,
       NEG_RISK_ADAPTER_ADDRESS
     );
 
@@ -96,7 +99,7 @@ export async function POST(request: NextRequest) {
       logger.warn({
         event: "api_attempt_insufficient_allowance",
         traceId,
-        safeAddress,
+        depositWalletAddress,
         spender: NEG_RISK_ADAPTER_ADDRESS,
         allowance: adapterAllowance.toString(),
         orderAmountUsdcMicros: orderAmountUsdcMicros.toString(),
@@ -114,7 +117,7 @@ export async function POST(request: NextRequest) {
       data: {
         privyUserId: auth.privyUserId,
         eoaAddress,
-        safeAddress,
+        depositWalletAddress,
         marketId: nullableString(quote.marketId),
         tokenId: String(quote.tokenId),
         outcome: nullableString(quote.outcome),

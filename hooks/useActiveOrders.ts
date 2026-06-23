@@ -31,21 +31,20 @@ export default function useActiveOrders(
       }
 
       try {
-        const allOrders = await clobClient.getOpenOrders();
+        const allOrders = normalizeOpenOrders(await clobClient.getOpenOrders());
 
-        const userOrders = allOrders.filter((order: any) => {
+        const userOrders = allOrders.filter((order) => {
           const orderMaker = (order.maker_address || "").toLowerCase();
           const userAddr = walletAddress.toLowerCase();
           return orderMaker === userAddr;
         });
 
-        const activeOrders = userOrders.filter((order: any) => {
+        const activeOrders = userOrders.filter((order) => {
           return order.status === "LIVE";
         });
 
-        return activeOrders as PolymarketOrder[];
-      } catch (err) {
-        console.error("Error fetching open orders:", err);
+        return activeOrders;
+      } catch {
         return [];
       }
     },
@@ -55,4 +54,13 @@ export default function useActiveOrders(
     refetchIntervalInBackground: true,
     refetchOnWindowFocus: true,
   });
+}
+
+function normalizeOpenOrders(response: unknown): PolymarketOrder[] {
+  if (Array.isArray(response)) return response as PolymarketOrder[];
+
+  const data = (response as { data?: unknown } | undefined)?.data;
+  if (Array.isArray(data)) return data as PolymarketOrder[];
+
+  return [];
 }

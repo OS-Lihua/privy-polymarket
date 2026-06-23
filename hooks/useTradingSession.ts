@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from "react";
 import useRelayClient from "@/hooks/useRelayClient";
 import { useWallet } from "@/providers/WalletContext";
 import useTokenApprovals from "@/hooks/useTokenApprovals";
-import useSafeDeployment from "@/hooks/useSafeDeployment";
 import useDepositWallet from "@/hooks/useDepositWallet";
 import useUserApiCredentials from "@/hooks/useUserApiCredentials";
 import {
@@ -17,7 +16,7 @@ import { APPROVAL_SCHEMA_VERSION } from "@/utils/approvals";
 // This is the coordination hook that manages the user's trading session
 // It orchestrates the steps for initializing both the clob and relay clients
 // It creates, stores, and loads the user's L2 credentials for the trading session (API credentials)
-// It deploys the Safe and sets token approvals for the CTF Exchange
+// It deploys the Deposit Wallet and sets token approvals for the CTF Exchange
 
 export default function useTradingSession() {
   const [currentStep, setCurrentStep] = useState<SessionStep>("idle");
@@ -33,8 +32,6 @@ export default function useTradingSession() {
     hasStoredBuilderCredentials,
   } = useUserApiCredentials();
   const { checkAllTokenApprovals, setAllTokenApprovals } = useTokenApprovals();
-  const { derivedSafeAddressFromEoa, isSafeDeployed, deploySafe } =
-    useSafeDeployment(eoaAddress);
   const { relayClient, initializeRelayClient, clearRelayClient } =
     useRelayClient();
   const {
@@ -107,24 +104,7 @@ export default function useTradingSession() {
       // per-user Builder credentials (via remote signing server).
       const initializedRelayClient = await initializeRelayClient();
 
-      // Step 3: Get Safe address (deterministic derivation from EOA)
-      if (!derivedSafeAddressFromEoa) {
-        throw new Error("Failed to derive Safe address");
-      }
-
-      // Step 4: Check if Safe is deployed
-      const isDeployed = await isSafeDeployed(
-        initializedRelayClient,
-        derivedSafeAddressFromEoa
-      );
-
-      // Step 5: Deploy Safe if not already deployed
-      if (!isDeployed) {
-        setCurrentStep("deploying");
-        await deploySafe(initializedRelayClient);
-      }
-
-      // Step 6: Set up Deposit Wallet
+      // Step 3: Set up Deposit Wallet
       setCurrentStep("depositWallet");
       const depositWalletAddress =
         (await initializedRelayClient.deriveDepositWalletAddress()) ||
@@ -140,7 +120,7 @@ export default function useTradingSession() {
         await deployDepositWallet(initializedRelayClient);
       }
 
-      // Step 7: Set all required token approvals for trading
+      // Step 4: Set all required token approvals for trading
       setCurrentStep("approvals");
       const approvalStatus = await checkAllTokenApprovals(
         depositWalletAddress
@@ -156,13 +136,11 @@ export default function useTradingSession() {
         );
       }
 
-      // Step 8: Create custom session object
+      // Step 5: Create custom session object
       const newSession: TradingSession = {
         eoaAddress: eoaAddress,
-        safeAddress: derivedSafeAddressFromEoa,
         depositWalletAddress,
         approvalSchemaVersion: APPROVAL_SCHEMA_VERSION,
-        isSafeDeployed: true,
         isDepositWalletDeployed: true,
         hasApiCredentials: true,
         hasApprovals,
@@ -182,9 +160,6 @@ export default function useTradingSession() {
     }
   }, [
     eoaAddress,
-    derivedSafeAddressFromEoa,
-    isSafeDeployed,
-    deploySafe,
     initializeRelayClient,
     tradingSession,
     createOrDeriveUserApiCredentials,
@@ -213,7 +188,6 @@ export default function useTradingSession() {
     currentStep,
     sessionError,
     isTradingSessionComplete:
-      tradingSession?.isSafeDeployed &&
       tradingSession?.isDepositWalletDeployed &&
       tradingSession?.depositWalletAddress &&
       tradingSession?.hasApiCredentials &&

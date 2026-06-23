@@ -5,9 +5,9 @@ import { checkAllApprovals, createAllApprovalCalls } from "@/utils/approvals";
 // Uses relayClient to set all required token approvals for trading
 
 export default function useTokenApprovals() {
-  const checkAllTokenApprovals = useCallback(async (safeAddress: string) => {
+  const checkAllTokenApprovals = useCallback(async (depositWalletAddress: string) => {
     try {
-      return await checkAllApprovals(safeAddress);
+      return await checkAllApprovals(depositWalletAddress);
     } catch (err) {
       const error =
         err instanceof Error ? err : new Error("Failed to check approvals");

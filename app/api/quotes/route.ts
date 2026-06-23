@@ -15,9 +15,13 @@ export async function POST(request: NextRequest) {
     const auth = await requirePrivyAuth(request);
     const body = await request.json();
     const tokenId = readString(body.tokenId, "tokenId");
-    const { eoaAddress, safeAddress } = await verifyDepositWalletOwnership({
+    const { eoaAddress, depositWalletAddress } =
+      await verifyDepositWalletOwnership({
       eoaAddress: readString(body.eoaAddress, "eoaAddress"),
-      safeAddress: readString(body.safeAddress, "safeAddress"),
+      depositWalletAddress: readString(
+        body.depositWalletAddress ?? body.safeAddress,
+        "depositWalletAddress"
+      ),
     });
 
     const feeConfig = getFeeConfig();
@@ -28,7 +32,7 @@ export async function POST(request: NextRequest) {
       traceId,
       privyUserId: auth.privyUserId,
       eoaAddress,
-      safeAddress,
+      depositWalletAddress,
       tokenId,
       totalAmountUsdcMicros: totalAmountUsdcMicros.toString(),
     });
@@ -69,7 +73,7 @@ export async function POST(request: NextRequest) {
       ...serializeQuote(quote),
       privyUserId: auth.privyUserId,
       eoaAddress,
-      safeAddress,
+      depositWalletAddress,
       feeWallet: feeConfig.feeWallet,
     });
   } catch (error) {

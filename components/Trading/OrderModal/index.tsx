@@ -31,7 +31,7 @@ type Quote = {
   estimatedShares: string;
   expiresAt: string;
   eoaAddress: string;
-  safeAddress: string;
+  depositWalletAddress: string;
   feeWallet: `0x${string}`;
 };
 
@@ -39,6 +39,16 @@ type TradeAttempt = {
   id: string;
   status: string;
 };
+
+class ActiveTradeAttemptError extends Error {
+  attempt?: TradeAttempt;
+
+  constructor(message: string, attempt?: TradeAttempt) {
+    super(message);
+    this.name = "ActiveTradeAttemptError";
+    this.attempt = attempt;
+  }
+}
 
 type OrderPlacementModalProps = {
   isOpen: boolean;
@@ -137,7 +147,7 @@ export default function OrderPlacementModal({
         negRisk,
         totalPayment,
         eoaAddress,
-        safeAddress: depositWalletAddress,
+        depositWalletAddress,
       });
       const token = await readPrivyAccessToken(getAccessToken);
       const response = await fetch("/api/quotes", {
@@ -149,7 +159,7 @@ export default function OrderPlacementModal({
         },
         body: JSON.stringify({
           eoaAddress,
-          safeAddress: depositWalletAddress,
+          depositWalletAddress,
           tokenId,
           outcome,
           negRisk,
@@ -215,6 +225,12 @@ export default function OrderPlacementModal({
       });
       const attemptBody = await attemptResponse.json();
       if (!attemptResponse.ok) {
+        if (attemptResponse.status === 409) {
+          throw new ActiveTradeAttemptError(
+            attemptBody.error || "Active trade attempt already exists",
+            attemptBody.attempt
+          );
+        }
         throw new Error(attemptBody.error || "Failed to create attempt");
       }
 
@@ -295,10 +311,17 @@ export default function OrderPlacementModal({
         event: "trade_confirm_failed",
         traceId,
         quoteId: quote.quoteId,
-        attemptId: currentAttempt?.id,
+        attemptId:
+          currentAttempt?.id ||
+          (error instanceof ActiveTradeAttemptError
+            ? error.attempt?.id
+            : undefined),
         error: serializeError(error),
       };
-      if (error instanceof ClobOrderError) {
+      if (
+        error instanceof ClobOrderError ||
+        error instanceof ActiveTradeAttemptError
+      ) {
         logger.warn(logContext);
       } else {
         logger.error(logContext);
@@ -306,7 +329,7 @@ export default function OrderPlacementModal({
       if (currentAttempt) {
         await submitOrderError(currentAttempt.id, error);
       }
-      setLocalError(error instanceof Error ? error.message : "Trade failed");
+      setLocalError(readTradeFailureMessage(error));
       setQuote(null);
       setStep("quote");
     }
@@ -461,7 +484,7 @@ export default function OrderPlacementModal({
     const result = await transferUsdc(relay, {
       recipient: currentQuote.feeWallet,
       amount: BigInt(currentQuote.feeAmountUsdcMicros),
-      walletAddress: currentQuote.safeAddress,
+      walletAddress: currentQuote.depositWalletAddress,
     });
 
     if (typeof result === "string") return result;
@@ -485,7 +508,10 @@ function QuoteSummary({
       <SummaryRow label={t("bestAsk")} value={`$${quote.bestAsk}`} />
       <SummaryRow label={t("maxPrice")} value={`$${quote.worstPrice}`} />
       <SummaryRow label={t("feeRecipient")} value={shortAddress(quote.feeWallet)} />
-      <SummaryRow label={t("tradingSafe")} value={shortAddress(quote.safeAddress)} />
+      <SummaryRow
+        label={t("tradingSafe")}
+        value={shortAddress(quote.depositWalletAddress)}
+      />
     </div>
   );
 }
@@ -540,6 +566,14 @@ function formatUsd(value: string) {
 
 function shortAddress(value: string) {
   return `${value.slice(0, 6)}...${value.slice(-4)}`;
+}
+
+function readTradeFailureMessage(error: unknown) {
+  if (error instanceof ActiveTradeAttemptError) {
+    return "A previous trade is still in progress. Wait for it to finish or cancel it before starting another trade.";
+  }
+
+  return error instanceof Error ? error.message : "Trade failed";
 }
 
 async function readPrivyAccessToken(getAccessToken: () => Promise<string | null>) {

@@ -48,7 +48,9 @@ export default function useGeoblock(): UseGeoblockReturn {
       });
 
       if (!response.ok) {
-        throw new Error(`Geoblock API error: ${response.status}`);
+        setGeoblockStatus(null);
+        setIsBlocked(true);
+        return;
       }
 
       const data: GeoblockStatus = await response.json();
@@ -59,7 +61,6 @@ export default function useGeoblock(): UseGeoblockReturn {
       const error =
         err instanceof Error ? err : new Error("Failed to check geoblock");
       setError(error);
-      console.error("Geoblock check failed:", error);
 
       setIsBlocked(true);
     } finally {

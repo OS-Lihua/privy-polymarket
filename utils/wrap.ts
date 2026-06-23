@@ -1,7 +1,5 @@
 import {
   DepositWalletCall,
-  OperationType,
-  SafeTransaction,
 } from "@polymarket/builder-relayer-client";
 import { encodeFunctionData, erc20Abi } from "viem";
 import {
@@ -28,15 +26,14 @@ const collateralOnrampAbi = [
   },
 ] as const;
 
-export const createWrapUsdcToPusdTxs = (
+export const createWrapUsdcToPusdCalls = (
   params: WrapParams
-): SafeTransaction[] => {
+): DepositWalletCall[] => {
   const { walletAddress, amount } = params;
 
   return [
     {
-      to: USDC_E_CONTRACT_ADDRESS,
-      operation: OperationType.Call,
+      target: USDC_E_CONTRACT_ADDRESS,
       data: encodeFunctionData({
         abi: erc20Abi,
         functionName: "approve",
@@ -45,8 +42,7 @@ export const createWrapUsdcToPusdTxs = (
       value: "0",
     },
     {
-      to: COLLATERAL_ONRAMP_ADDRESS,
-      operation: OperationType.Call,
+      target: COLLATERAL_ONRAMP_ADDRESS,
       data: encodeFunctionData({
         abi: collateralOnrampAbi,
         functionName: "wrap",
@@ -55,14 +51,4 @@ export const createWrapUsdcToPusdTxs = (
       value: "0",
     },
   ];
-};
-
-export const createWrapUsdcToPusdCalls = (
-  params: WrapParams
-): DepositWalletCall[] => {
-  return createWrapUsdcToPusdTxs(params).map((txn) => ({
-    target: txn.to,
-    value: txn.value,
-    data: txn.data,
-  }));
 };

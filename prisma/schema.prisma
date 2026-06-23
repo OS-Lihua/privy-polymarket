@@ -11,7 +11,7 @@ model TradeAttempt {
   id                         String   @id @default(cuid())
   privyUserId                String
   eoaAddress                 String
-  safeAddress                String
+  depositWalletAddress       String
 
   marketId                   String?
   tokenId                    String
@@ -43,6 +43,11 @@ model TradeAttempt {
 
   refundTxHash               String?
   refundedAt                 DateTime?
+  refundGrossUsdcMicros      BigInt?
+  refundGasFeeUsdcMicros     BigInt?
+  refundNetUsdcMicros        BigInt?
+  refundGasEstimateJson      Json?
+  refundErrorMessage         String?
 
   quoteSnapshotJson          Json
   errorMessage               String?
@@ -51,7 +56,7 @@ model TradeAttempt {
   updatedAt                  DateTime @updatedAt
 
   @@index([privyUserId, status])
-  @@index([safeAddress])
+  @@index([depositWalletAddress])
   @@index([feeTxHash])
   @@index([polymarketOrderId])
 }

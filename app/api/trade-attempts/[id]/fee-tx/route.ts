@@ -51,7 +51,7 @@ export async function POST(
 
     await verifyUsdcTransfer({
       txHash: feeTxHash,
-      from: attempt.safeAddress,
+      from: attempt.depositWalletAddress,
       to: attempt.feeWallet,
       amount: attempt.feeAmountUsdcMicros,
     });

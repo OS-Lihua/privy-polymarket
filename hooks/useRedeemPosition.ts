@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { RelayClient } from "@polymarket/builder-relayer-client";
-import { createRedeemTx, RedeemParams } from "@/utils/redeem";
+import { createRedeemCall, RedeemParams } from "@/utils/redeem";
 
 export default function useRedeemPosition() {
   const [isRedeeming, setIsRedeeming] = useState(false);
@@ -9,18 +9,17 @@ export default function useRedeemPosition() {
   const redeemPosition = useCallback(
     async (
       relayClient: RelayClient,
+      depositWalletAddress: string,
       params: RedeemParams
     ): Promise<boolean> => {
       setIsRedeeming(true);
       setError(null);
 
       try {
-        const redeemTx = createRedeemTx(params);
-
-        // Using execute() method as per your existing pattern
-        const response = await relayClient.execute(
-          [redeemTx],
-          `Redeem position for condition ${params.conditionId}`
+        const response = await relayClient.executeDepositWalletBatch(
+          [createRedeemCall(params)],
+          depositWalletAddress,
+          createDeadline()
         );
 
         await response.wait();
@@ -43,4 +42,8 @@ export default function useRedeemPosition() {
     error,
     redeemPosition,
   };
+}
+
+function createDeadline() {
+  return Math.floor(Date.now() / 1000 + 10 * 60).toString();
 }

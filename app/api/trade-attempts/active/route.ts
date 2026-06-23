@@ -7,12 +7,16 @@ import { serializeAttempt } from "@/lib/server/serialize";
 export async function GET(request: NextRequest) {
   try {
     const auth = await requirePrivyAuth(request);
-    const safeAddress = request.nextUrl.searchParams.get("safeAddress");
+    const depositWalletAddress =
+      request.nextUrl.searchParams.get("depositWalletAddress") ||
+      request.nextUrl.searchParams.get("safeAddress");
 
     const attempt = await prisma.tradeAttempt.findFirst({
       where: {
         privyUserId: auth.privyUserId,
-        ...(safeAddress ? { safeAddress } : {}),
+        ...(depositWalletAddress
+          ? { depositWalletAddress }
+          : {}),
         status: { in: [...BLOCKING_ATTEMPT_STATUSES] },
       },
       orderBy: { createdAt: "desc" },

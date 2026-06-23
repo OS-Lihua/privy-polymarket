@@ -14,8 +14,9 @@ async function main() {
     attempts.map((attempt) => ({
       id: attempt.id,
       status: attempt.status,
-      safeAddress: attempt.safeAddress,
+      depositWalletAddress: attempt.depositWalletAddress,
       feeTxHash: attempt.feeTxHash,
+      refundErrorMessage: attempt.refundErrorMessage,
       updatedAt: attempt.updatedAt.toISOString(),
     }))
   );

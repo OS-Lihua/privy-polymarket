@@ -15,7 +15,7 @@ export default function SessionSuccess({
         <ul className="space-y-1 ml-4 list-disc">
           <li>
             {t("depositWallet")}:{" "}
-            {session.depositWalletAddress ?? session.safeAddress}
+            {session.depositWalletAddress}
           </li>
           <li>{t("sessionCredentials")}</li>
           <li>{t("sessionApprovals")}</li>

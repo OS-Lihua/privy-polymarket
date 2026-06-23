@@ -49,6 +49,29 @@ export function getFeeConfig() {
   };
 }
 
+export function getPlatformFeePrivateKey() {
+  const privateKey = process.env.PLATFORM_FEE_PRIVATE_KEY;
+  if (!privateKey) {
+    throw new Error("PLATFORM_FEE_PRIVATE_KEY is not configured");
+  }
+
+  return privateKey as `0x${string}`;
+}
+
+export function getAutoRefundConfig() {
+  return {
+    enabled: parseBooleanEnv("AUTO_REFUND_ENABLED", true),
+    maxPerUserPerHour: parseIntegerEnv("AUTO_REFUND_MAX_PER_USER_PER_HOUR", 3),
+    gasBufferBps: parseIntegerEnv("AUTO_REFUND_GAS_BUFFER_BPS", 2000),
+    minNetUsdcMicros: BigInt(
+      parseIntegerEnv("AUTO_REFUND_MIN_NET_USDC_MICROS", 100_000)
+    ),
+    polUsdPriceUrl:
+      process.env.POL_USD_PRICE_URL ||
+      "https://api.coingecko.com/api/v3/simple/price?ids=polygon-ecosystem-token&vs_currencies=usd",
+  };
+}
+
 export function getPolygonRpcUrl() {
   const rpcUrl = process.env.POLYGON_RPC_URL || process.env.NEXT_PUBLIC_POLYGON_RPC_URL;
 
@@ -69,4 +92,11 @@ function parseIntegerEnv(name: string, fallback: number) {
   }
 
   return parsed;
+}
+
+function parseBooleanEnv(name: string, fallback: boolean) {
+  const value = process.env[name];
+  if (!value) return fallback;
+
+  return value === "true" || value === "1";
 }

@@ -7,7 +7,6 @@ import { useWallet } from "@/providers/WalletContext";
 import { useTrading } from "@/providers/TradingProvider";
 import usePolygonBalances from "@/hooks/usePolygonBalances";
 import useWrapUsdcToPusd from "@/hooks/useWrapUsdcToPusd";
-import useMigrateSafePusd from "@/hooks/useMigrateSafePusd";
 
 import Card from "@/components/shared/Card";
 import Badge from "@/components/shared/Badge";
@@ -23,7 +22,7 @@ export default function PolygonAssets() {
   const queryClient = useQueryClient();
 
   const { eoaAddress } = useWallet();
-  const { relayClient, safeAddress, depositWalletAddress } = useTrading();
+  const { relayClient, depositWalletAddress } = useTrading();
   const {
     formattedPusdBalance,
     formattedUsdcBalance,
@@ -32,19 +31,8 @@ export default function PolygonAssets() {
     isError,
     error,
   } = usePolygonBalances(depositWalletAddress);
-  const {
-    formattedPusdBalance: formattedSafePusdBalance,
-    rawPusdBalance: rawSafePusdBalance,
-  } = usePolygonBalances(safeAddress);
   const { isWrapping, error: wrapHookError, wrapUsdcToPusd } =
     useWrapUsdcToPusd();
-  const {
-    migrateSafePusd,
-    isMigrating,
-    error: migrateHookError,
-  } = useMigrateSafePusd();
-
-  const hasSafePusd = Boolean(rawSafePusdBalance && rawSafePusdBalance > 0n);
 
   const handleWrapAll = async () => {
     if (!relayClient || !depositWalletAddress || usdcBalance <= 0) {
@@ -61,29 +49,6 @@ export default function PolygonAssets() {
       await queryClient.invalidateQueries({ queryKey: ["polygon-balances"] });
     } catch (err) {
       setWrapError(err instanceof Error ? err.message : "Failed to wrap");
-    }
-  };
-
-  const handleMigrateSafePusd = async () => {
-    if (
-      !relayClient ||
-      !depositWalletAddress ||
-      !rawSafePusdBalance ||
-      rawSafePusdBalance <= 0n
-    ) {
-      setWrapError(t("noLegacySafeBalance"));
-      return;
-    }
-
-    try {
-      setWrapError(null);
-      await migrateSafePusd(relayClient, {
-        depositWalletAddress,
-        amount: rawSafePusdBalance,
-      });
-      await queryClient.invalidateQueries({ queryKey: ["polygon-balances"] });
-    } catch (err) {
-      setWrapError(err instanceof Error ? err.message : t("migrationFailed"));
     }
   };
 
@@ -163,34 +128,6 @@ export default function PolygonAssets() {
             </p>
           )}
         </div>
-
-        {safeAddress && hasSafePusd && (
-          <div className="mt-3 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3 text-left">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-xs text-yellow-200/80">
-                  {t("legacySafeBalance")}
-                </p>
-                <p className="text-sm font-semibold text-yellow-100">
-                  {formattedSafePusdBalance} pUSD · {formatAddress(safeAddress)}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleMigrateSafePusd}
-                disabled={isMigrating}
-                className="btn border border-yellow-500/30 bg-yellow-500/15 text-yellow-100 hover:bg-yellow-500/25 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isMigrating ? t("migrating") : t("migrateSafePusd")}
-              </button>
-            </div>
-            {migrateHookError && (
-              <p className="mt-2 text-xs text-red-300">
-                {migrateHookError.message}
-              </p>
-            )}
-          </div>
-        )}
 
         <p className="text-xs text-white/50 mt-3" data-tour="safe-address">
           {t("depositWalletAddress")}: {formatAddress(depositWalletAddress)}

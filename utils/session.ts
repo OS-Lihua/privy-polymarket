@@ -1,9 +1,7 @@
 export interface TradingSession {
   eoaAddress: string;
-  safeAddress: string;
   depositWalletAddress?: string;
   approvalSchemaVersion?: number;
-  isSafeDeployed: boolean;
   isDepositWalletDeployed?: boolean;
   hasApiCredentials: boolean;
   hasApprovals: boolean;
@@ -18,7 +16,6 @@ export interface TradingSession {
 export type SessionStep =
   | "idle"
   | "checking"
-  | "deploying"
   | "depositWallet"
   | "credentials"
   | "approvals"

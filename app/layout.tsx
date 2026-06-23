@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Polymarket Safe Trader - Privy EOA",
+  title: "Polymarket Deposit Wallet Trader",
   description:
-    "Polymarket demo using Privy for authentication and embedded wallets, trading through a Safe Wallet using the CLOB and Relayer client",
+    "Polymarket demo using Privy for authentication and Deposit Wallet trading through the CLOB and Relayer clients",
 };
 
 export default function RootLayout({

@@ -1,9 +1,5 @@
 import { createPublicClient, encodeFunctionData, erc20Abi } from "viem";
-import {
-  DepositWalletCall,
-  OperationType,
-  SafeTransaction,
-} from "@polymarket/builder-relayer-client";
+import type { DepositWalletCall } from "@polymarket/builder-relayer-client";
 import { polygon } from "viem/chains";
 import {
   PUSD_CONTRACT_ADDRESS,
@@ -60,7 +56,7 @@ const OUTCOME_TOKEN_SPENDERS = [
 ] as const;
 
 const checkPusdApprovalForSpender = async (
-  safeAddress: string,
+  depositWalletAddress: string,
   spender: string
 ): Promise<boolean> => {
   try {
@@ -68,7 +64,7 @@ const checkPusdApprovalForSpender = async (
       address: PUSD_CONTRACT_ADDRESS as `0x${string}`,
       abi: erc20Abi,
       functionName: "allowance",
-      args: [safeAddress as `0x${string}`, spender as `0x${string}`],
+      args: [depositWalletAddress as `0x${string}`, spender as `0x${string}`],
     });
 
     const threshold = BigInt("1000000000000");
@@ -80,7 +76,7 @@ const checkPusdApprovalForSpender = async (
 };
 
 const checkERC1155ApprovalForSpender = async (
-  safeAddress: string,
+  depositWalletAddress: string,
   spender: string
 ): Promise<boolean> => {
   try {
@@ -88,7 +84,7 @@ const checkERC1155ApprovalForSpender = async (
       address: CTF_CONTRACT_ADDRESS as `0x${string}`,
       abi: erc1155Abi,
       functionName: "isApprovedForAll",
-      args: [safeAddress as `0x${string}`, spender as `0x${string}`],
+      args: [depositWalletAddress as `0x${string}`, spender as `0x${string}`],
     });
 
     return isApproved;
@@ -99,7 +95,7 @@ const checkERC1155ApprovalForSpender = async (
 };
 
 export const checkAllApprovals = async (
-  safeAddress: string
+  depositWalletAddress: string
 ): Promise<{
   allApproved: boolean;
   usdcApprovals: Record<string, boolean>;
@@ -111,7 +107,7 @@ export const checkAllApprovals = async (
   await Promise.all(
     PUSD_SPENDERS.map(async ({ address, name }) => {
       usdcApprovals[name] = await checkPusdApprovalForSpender(
-        safeAddress,
+        depositWalletAddress,
         address
       );
     })
@@ -120,7 +116,7 @@ export const checkAllApprovals = async (
   await Promise.all(
     OUTCOME_TOKEN_SPENDERS.map(async ({ address, name }) => {
       outcomeTokenApprovals[name] = await checkERC1155ApprovalForSpender(
-        safeAddress,
+        depositWalletAddress,
         address
       );
     })
@@ -137,13 +133,12 @@ export const checkAllApprovals = async (
   };
 };
 
-export const createAllApprovalTxs = (): SafeTransaction[] => {
-  const safeTxns: SafeTransaction[] = [];
+export const createAllApprovalCalls = (): DepositWalletCall[] => {
+  const calls: DepositWalletCall[] = [];
 
   for (const { address } of PUSD_SPENDERS) {
-    safeTxns.push({
-      to: PUSD_CONTRACT_ADDRESS,
-      operation: OperationType.Call,
+    calls.push({
+      target: PUSD_CONTRACT_ADDRESS,
       data: encodeFunctionData({
         abi: erc20Abi,
         functionName: "approve",
@@ -154,9 +149,8 @@ export const createAllApprovalTxs = (): SafeTransaction[] => {
   }
 
   for (const { address } of OUTCOME_TOKEN_SPENDERS) {
-    safeTxns.push({
-      to: CTF_CONTRACT_ADDRESS,
-      operation: OperationType.Call,
+    calls.push({
+      target: CTF_CONTRACT_ADDRESS,
       data: encodeFunctionData({
         abi: erc1155Abi,
         functionName: "setApprovalForAll",
@@ -166,13 +160,5 @@ export const createAllApprovalTxs = (): SafeTransaction[] => {
     });
   }
 
-  return safeTxns;
-};
-
-export const createAllApprovalCalls = (): DepositWalletCall[] => {
-  return createAllApprovalTxs().map((txn) => ({
-    target: txn.to,
-    value: txn.value,
-    data: txn.data,
-  }));
+  return calls;
 };

@@ -19,14 +19,14 @@ import { DUST_THRESHOLD } from "@/constants/validation";
 import { POLLING_DURATION, POLLING_INTERVAL } from "@/constants/query";
 
 export default function UserPositions() {
-  const { clobClient, relayClient, safeAddress } = useTrading();
+  const { clobClient, relayClient, depositWalletAddress } = useTrading();
   const { eoaAddress } = useWallet();
 
   const {
     data: positions,
     isLoading,
     error,
-  } = useUserPositions(safeAddress as string | undefined);
+  } = useUserPositions(depositWalletAddress as string | undefined);
 
   const [hideDust, setHideDust] = useState(true);
   const [redeemingAsset, setRedeemingAsset] = useState<string | null>(null);
@@ -101,19 +101,23 @@ export default function UserPositions() {
   };
 
   const handleRedeem = async (position: PolymarketPosition) => {
-    if (!relayClient) {
+    if (!relayClient || !depositWalletAddress) {
       alert("Relay client not initialized");
       return;
     }
 
     setRedeemingAsset(position.asset);
     try {
-      await redeemPosition(relayClient, {
-        conditionId: position.conditionId,
-        outcomeIndex: position.outcomeIndex,
-        negativeRisk: position.negativeRisk,
-        size: position.size,
-      });
+      await redeemPosition(
+        relayClient,
+        depositWalletAddress,
+        {
+          conditionId: position.conditionId,
+          outcomeIndex: position.outcomeIndex,
+          negativeRisk: position.negativeRisk,
+          size: position.size,
+        }
+      );
 
       queryClient.invalidateQueries({ queryKey: ["polymarket-positions"] });
       queryClient.invalidateQueries({ queryKey: ["polygon-balances"] });
@@ -195,7 +199,7 @@ export default function UserPositions() {
             isPendingVerification={pendingVerification.has(position.asset)}
             isSubmitting={isSubmitting}
             canSell={!!clobClient}
-            canRedeem={!!relayClient}
+            canRedeem={!!relayClient && !!depositWalletAddress}
           />
         ))}
       </div>
