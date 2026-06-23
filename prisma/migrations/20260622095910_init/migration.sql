@@ -1,9 +1,12 @@
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "public";
+
 -- CreateTable
 CREATE TABLE "TradeAttempt" (
     "id" TEXT NOT NULL,
     "privyUserId" TEXT NOT NULL,
     "eoaAddress" TEXT NOT NULL,
-    "safeAddress" TEXT NOT NULL,
+    "depositWalletAddress" TEXT NOT NULL,
     "marketId" TEXT,
     "tokenId" TEXT NOT NULL,
     "outcome" TEXT,
@@ -29,6 +32,11 @@ CREATE TABLE "TradeAttempt" (
     "clientReportedAt" TIMESTAMP(3),
     "refundTxHash" TEXT,
     "refundedAt" TIMESTAMP(3),
+    "refundGrossUsdcMicros" BIGINT,
+    "refundGasFeeUsdcMicros" BIGINT,
+    "refundNetUsdcMicros" BIGINT,
+    "refundGasEstimateJson" JSONB,
+    "refundErrorMessage" TEXT,
     "quoteSnapshotJson" JSONB NOT NULL,
     "errorMessage" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -37,14 +45,34 @@ CREATE TABLE "TradeAttempt" (
     CONSTRAINT "TradeAttempt_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "UserBuilderCredential" (
+    "id" TEXT NOT NULL,
+    "privyUserId" TEXT NOT NULL,
+    "eoaAddress" TEXT NOT NULL,
+    "keyCiphertext" TEXT NOT NULL,
+    "secretCiphertext" TEXT NOT NULL,
+    "passphraseCiphertext" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "UserBuilderCredential_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE INDEX "TradeAttempt_privyUserId_status_idx" ON "TradeAttempt"("privyUserId", "status");
 
 -- CreateIndex
-CREATE INDEX "TradeAttempt_safeAddress_idx" ON "TradeAttempt"("safeAddress");
+CREATE INDEX "TradeAttempt_depositWalletAddress_idx" ON "TradeAttempt"("depositWalletAddress");
 
 -- CreateIndex
 CREATE INDEX "TradeAttempt_feeTxHash_idx" ON "TradeAttempt"("feeTxHash");
 
 -- CreateIndex
 CREATE INDEX "TradeAttempt_polymarketOrderId_idx" ON "TradeAttempt"("polymarketOrderId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "UserBuilderCredential_privyUserId_key" ON "UserBuilderCredential"("privyUserId");
+
+-- CreateIndex
+CREATE INDEX "UserBuilderCredential_eoaAddress_idx" ON "UserBuilderCredential"("eoaAddress");
