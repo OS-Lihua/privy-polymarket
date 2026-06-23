@@ -6,19 +6,19 @@ import { Button } from "@/components/ui/button";
 import { useTheme } from "@/providers/ThemeProvider";
 
 export default function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme();
-  const isDark = theme === "dark";
+	const { theme, toggleTheme } = useTheme();
+	const isDark = theme === "dark";
 
-  return (
-    <Button
-      type="button"
-      variant="outline"
-      size="icon"
-      onClick={toggleTheme}
-      aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
-      title={isDark ? "Switch to light theme" : "Switch to dark theme"}
-    >
-      {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-    </Button>
-  );
+	return (
+		<Button
+			type="button"
+			variant="outline"
+			size="icon"
+			onClick={toggleTheme}
+			aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
+			title={isDark ? "Switch to light theme" : "Switch to dark theme"}
+		>
+			{isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+		</Button>
+	);
 }

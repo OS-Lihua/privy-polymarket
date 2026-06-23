@@ -40,7 +40,8 @@ const dictionaries = {
     safeRechargeAddress: "Deposit Wallet funding address",
     depositWalletAddress: "Deposit Wallet address",
     send: "Send",
-    polygonUsdcWarning: "Use Polygon pUSD for orders. Wrap USDC.e to pUSD first if needed.",
+    polygonUsdcWarning:
+      "Use Polygon pUSD for orders. Wrap USDC.e to pUSD first if needed.",
     availableUsdcE: "Available to wrap",
     wrapToPusd: "Wrap USDC.e to pUSD",
     wrapping: "Wrapping",
@@ -146,14 +147,16 @@ const dictionaries = {
     profileUnavailable: "这个 Privy 钱包没有对应的 Polymarket.com 主页。",
     eoaHelp: "这个钱包只用来签名，不要往这里充值。",
     safeHelp: "这是用于对比展示的确定性 Safe 地址。真实交易使用交易钱包。",
-    depositWalletHelp: "这个钱包存放 CLOB V2 交易资金。充值 Polygon pUSD 到这里。",
+    depositWalletHelp:
+      "这个钱包存放 CLOB V2 交易资金。充值 Polygon pUSD 到这里。",
     tradingBalance: "交易余额",
     loadingBalance: "正在读取余额",
     errorLoadingBalance: "余额读取失败",
     safeRechargeAddress: "交易钱包充值地址",
     depositWalletAddress: "交易钱包地址",
     send: "发送",
-    polygonUsdcWarning: "下单使用 Polygon pUSD；如果有 USDC.e，请先包装成 pUSD。",
+    polygonUsdcWarning:
+      "下单使用 Polygon pUSD；如果有 USDC.e，请先包装成 pUSD。",
     availableUsdcE: "可包装余额",
     wrapToPusd: "USDC.e 包装成 pUSD",
     wrapping: "包装中",
@@ -162,8 +165,7 @@ const dictionaries = {
     readyToTrade: "可以交易",
     notInitialized: "未初始化",
     sessionQuestion: "什么是交易会话？",
-    sessionIntro:
-      "交易会话会准备交易钱包、Polymarket 凭证和代币授权。",
+    sessionIntro: "交易会话会准备交易钱包、Polymarket 凭证和代币授权。",
     sessionDeploy: "签名部署交易钱包，如已部署会跳过",
     sessionCredentials: "签名创建或恢复 CLOB API 凭证",
     sessionApprovals: "签名授权交易所使用代币",
@@ -231,11 +233,9 @@ const dictionaries = {
     tourDepositBody:
       "这里显示 pUSD 余额。下单前需要向交易钱包充值 Polygon pUSD，或把 USDC.e 包装成 pUSD。",
     tourSessionTitle: "3. 初始化",
-    tourSessionBody:
-      "部署交易钱包、创建 Polymarket API 凭证，并完成代币授权。",
+    tourSessionBody: "部署交易钱包、创建 Polymarket API 凭证，并完成代币授权。",
     tourOrderTitle: "4. 下单",
-    tourOrderBody:
-      "选择活跃市场，获取最终报价，支付平台手续费，然后提交订单。",
+    tourOrderBody: "选择活跃市场，获取最终报价，支付平台手续费，然后提交订单。",
     tourNext: "下一步",
     tourBack: "上一步",
     tourDone: "完成",
@@ -275,7 +275,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         return text;
       },
     }),
-    [language]
+    [language],
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

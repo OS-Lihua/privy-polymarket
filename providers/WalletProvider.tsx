@@ -2,10 +2,10 @@
 
 import { useState, useEffect, ReactNode } from "react";
 import {
-  createWalletClient,
-  createPublicClient,
-  custom,
-  type WalletClient,
+	createWalletClient,
+	createPublicClient,
+	custom,
+	type WalletClient,
 } from "viem";
 import { providers } from "ethers";
 import { PrivyProvider, useWallets, usePrivy } from "@privy-io/react-auth";
@@ -16,107 +16,106 @@ import { polygonChainWithRpc } from "@/utils/polygonChain";
 import { logger, serializeError } from "@/lib/logger";
 
 const publicClient = createPublicClient({
-  chain: polygon,
-  transport: polygonTransport(),
+	chain: polygon,
+	transport: polygonTransport(),
 });
 
 function WalletContextProvider({ children }: { children: ReactNode }) {
-  const [walletClient, setWalletClient] = useState<WalletClient | null>(null);
-  const [ethersSigner, setEthersSigner] =
-    useState<providers.JsonRpcSigner | null>(null);
+	const [walletClient, setWalletClient] = useState<WalletClient | null>(null);
+	const [ethersSigner, setEthersSigner] =
+		useState<providers.JsonRpcSigner | null>(null);
 
-  const { wallets, ready } = useWallets();
-  const { authenticated, user } = usePrivy();
+	const { wallets, ready } = useWallets();
+	const { authenticated, user } = usePrivy();
 
-  const wallet = wallets.find(w => w.address === user?.wallet?.address);
-  const eoaAddress = authenticated && wallet 
-    ? (wallet.address as `0x${string}`) 
-    : undefined;
+	const wallet = wallets.find((w) => w.address === user?.wallet?.address);
+	const eoaAddress =
+		authenticated && wallet ? (wallet.address as `0x${string}`) : undefined;
 
-  useEffect(() => {
-    async function init() {
-      if (!wallet || !ready) {
-        setWalletClient(null);
-        setEthersSigner(null);
-        return;
-      }
+	useEffect(() => {
+		async function init() {
+			if (!wallet || !ready) {
+				setWalletClient(null);
+				setEthersSigner(null);
+				return;
+			}
 
-      try {
-        const provider = await wallet.getEthereumProvider();
+			try {
+				const provider = await wallet.getEthereumProvider();
 
-        const client = createWalletClient({
-          account: eoaAddress!,
-          chain: polygon,
-          transport: custom(provider),
-        });
+				const client = createWalletClient({
+					account: eoaAddress!,
+					chain: polygon,
+					transport: custom(provider),
+				});
 
-        setWalletClient(client);
+				setWalletClient(client);
 
-        const ethersProvider = new providers.Web3Provider(provider);
-        setEthersSigner(ethersProvider.getSigner());
-      } catch (err) {
-        logger.warn({
-          event: "wallet_client_init_failed",
-          error: serializeError(err),
-        });
-        setWalletClient(null);
-        setEthersSigner(null);
-      }
-    }
+				const ethersProvider = new providers.Web3Provider(provider);
+				setEthersSigner(ethersProvider.getSigner());
+			} catch (err) {
+				logger.warn({
+					event: "wallet_client_init_failed",
+					error: serializeError(err),
+				});
+				setWalletClient(null);
+				setEthersSigner(null);
+			}
+		}
 
-    init();
-  }, [wallet, ready, eoaAddress]);
+		init();
+	}, [wallet, ready, eoaAddress]);
 
-  useEffect(() => {
-    async function ensurePolygonChain() {
-      if (!wallet || !ready || !authenticated) return;
-      
-      try {
-        const chainId = wallet.chainId;
-        if (chainId !== `eip155:${polygon.id}`) {
-          await wallet.switchChain(polygon.id);
-        }
-      } catch (err) {
-        logger.warn({
-          event: "wallet_chain_switch_failed",
-          error: serializeError(err),
-        });
-      }
-    }
-    ensurePolygonChain();
-  }, [wallet, ready, authenticated]);
+	useEffect(() => {
+		async function ensurePolygonChain() {
+			if (!wallet || !ready || !authenticated) return;
 
-  return (
-    <WalletContext.Provider
-      value={{
-        eoaAddress,
-        walletClient,
-        publicClient,
-        ethersSigner,
-        isReady: ready && authenticated && !!walletClient,
-        authenticated,
-      }}
-    >
-      {children}
-    </WalletContext.Provider>
-  );
+			try {
+				const chainId = wallet.chainId;
+				if (chainId !== `eip155:${polygon.id}`) {
+					await wallet.switchChain(polygon.id);
+				}
+			} catch (err) {
+				logger.warn({
+					event: "wallet_chain_switch_failed",
+					error: serializeError(err),
+				});
+			}
+		}
+		ensurePolygonChain();
+	}, [wallet, ready, authenticated]);
+
+	return (
+		<WalletContext.Provider
+			value={{
+				eoaAddress,
+				walletClient,
+				publicClient,
+				ethersSigner,
+				isReady: ready && authenticated && !!walletClient,
+				authenticated,
+			}}
+		>
+			{children}
+		</WalletContext.Provider>
+	);
 }
 
 export default function Provider({ children }: { children: ReactNode }) {
-  return (
-    <PrivyProvider
-      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID as string}
-      config={{
-        defaultChain: polygon,
-        supportedChains: [polygonChainWithRpc()],
-        embeddedWallets: {
-          ethereum: {
-            createOnLogin: "users-without-wallets",
-          },
-        },
-      }}
-    >
-      <WalletContextProvider>{children}</WalletContextProvider>
-    </PrivyProvider>
-  );
+	return (
+		<PrivyProvider
+			appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID as string}
+			config={{
+				defaultChain: polygon,
+				supportedChains: [polygonChainWithRpc()],
+				embeddedWallets: {
+					ethereum: {
+						createOnLogin: "users-without-wallets",
+					},
+				},
+			}}
+		>
+			<WalletContextProvider>{children}</WalletContextProvider>
+		</PrivyProvider>
+	);
 }

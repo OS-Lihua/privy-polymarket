@@ -9,47 +9,47 @@ import GeoBlockedBanner from "@/components/GeoBlockedBanner";
 import OnboardingGuide from "@/components/OnboardingGuide";
 
 export default function Home() {
-  const {
-    tradingSession,
-    currentStep,
-    sessionError,
-    isTradingSessionComplete,
-    initializeTradingSession,
-    endTradingSession,
-    eoaAddress,
-    isGeoblocked,
-    isGeoblockLoading,
-    geoblockStatus,
-  } = useTrading();
+	const {
+		tradingSession,
+		currentStep,
+		sessionError,
+		isTradingSessionComplete,
+		initializeTradingSession,
+		endTradingSession,
+		eoaAddress,
+		isGeoblocked,
+		isGeoblockLoading,
+		geoblockStatus,
+	} = useTrading();
 
-  return (
-    <div className="min-h-screen px-4 py-4 sm:px-6 lg:px-8">
-      <div className="mx-auto flex max-w-7xl flex-col gap-5">
-      <Header onEndSession={endTradingSession} />
+	return (
+		<div className="min-h-screen px-4 py-4 sm:px-6 lg:px-8">
+			<div className="mx-auto flex max-w-7xl flex-col gap-5">
+				<Header onEndSession={endTradingSession} />
 
-      {/* Show geoblock banner if user is in blocked region */}
-      {isGeoblocked && !isGeoblockLoading && (
-        <GeoBlockedBanner geoblockStatus={geoblockStatus} />
-      )}
+				{/* Show geoblock banner if user is in blocked region */}
+				{isGeoblocked && !isGeoblockLoading && (
+					<GeoBlockedBanner geoblockStatus={geoblockStatus} />
+				)}
 
-      <PolygonAssets />
+				<PolygonAssets />
 
-      {/* Hide trading session initialization when geoblocked */}
-      {!isGeoblocked && (
-        <TradingSession
-          session={tradingSession}
-          currentStep={currentStep}
-          error={sessionError}
-          isComplete={isTradingSessionComplete}
-          initialize={initializeTradingSession}
-          endSession={endTradingSession}
-        />
-      )}
+				{/* Hide trading session initialization when geoblocked */}
+				{!isGeoblocked && (
+					<TradingSession
+						session={tradingSession}
+						currentStep={currentStep}
+						error={sessionError}
+						isComplete={isTradingSessionComplete}
+						initialize={initializeTradingSession}
+						endSession={endTradingSession}
+					/>
+				)}
 
-      {eoaAddress && <MarketTabs />}
+				{eoaAddress && <MarketTabs />}
 
-      <OnboardingGuide enabled={Boolean(eoaAddress)} />
-      </div>
-    </div>
-  );
+				<OnboardingGuide enabled={Boolean(eoaAddress)} />
+			</div>
+		</div>
+	);
 }

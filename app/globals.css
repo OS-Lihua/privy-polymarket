@@ -98,8 +98,16 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(circle at 18% 0%, color-mix(in oklch, var(--primary) 18%, transparent), transparent 26rem),
-    linear-gradient(180deg, color-mix(in oklch, var(--panel) 62%, transparent), transparent 18rem);
+    radial-gradient(
+      circle at 18% 0%,
+      color-mix(in oklch, var(--primary) 18%, transparent),
+      transparent 26rem
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--panel) 62%, transparent),
+      transparent 18rem
+    );
 }
 
 * {

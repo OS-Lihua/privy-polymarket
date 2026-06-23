@@ -14,7 +14,7 @@ export {
 
 // Chain configuration
 export const POLYGON_CHAIN_ID = Number(
-  process.env.NEXT_PUBLIC_POLYGON_CHAIN_ID || "137"
+  process.env.NEXT_PUBLIC_POLYGON_CHAIN_ID || "137",
 );
 
 // Session storage

@@ -23,7 +23,7 @@ async function main() {
   });
 
   console.log(
-    `Refund pending for ${attempt.id}: send ${attempt.feeAmountUsdcMicros.toString()} micro-USDC to ${attempt.depositWalletAddress}`
+    `Refund pending for ${attempt.id}: send ${attempt.feeAmountUsdcMicros.toString()} micro-USDC to ${attempt.depositWalletAddress}`,
   );
 }
 

@@ -6,31 +6,31 @@ import { serializeAttempt } from "@/lib/server/serialize";
 import { getTraceId, logError } from "@/lib/server/logger";
 
 export async function GET(request: NextRequest) {
-  const traceId = getTraceId(request.headers);
+	const traceId = getTraceId(request.headers);
 
-  try {
-    const auth = await requirePrivyAuth(request);
-    const depositWalletAddress =
-      request.nextUrl.searchParams.get("depositWalletAddress") ||
-      request.nextUrl.searchParams.get("safeAddress");
+	try {
+		const auth = await requirePrivyAuth(request);
+		const depositWalletAddress =
+			request.nextUrl.searchParams.get("depositWalletAddress") ||
+			request.nextUrl.searchParams.get("safeAddress");
 
-    const attempt = await prisma.tradeAttempt.findFirst({
-      where: {
-        privyUserId: auth.privyUserId,
-        ...(depositWalletAddress
-          ? { depositWalletAddress }
-          : {}),
-        status: { in: [...BLOCKING_ATTEMPT_STATUSES] },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+		const attempt = await prisma.tradeAttempt.findFirst({
+			where: {
+				privyUserId: auth.privyUserId,
+				...(depositWalletAddress ? { depositWalletAddress } : {}),
+				status: { in: [...BLOCKING_ATTEMPT_STATUSES] },
+			},
+			orderBy: { createdAt: "desc" },
+		});
 
-    return NextResponse.json({ attempt: attempt ? serializeAttempt(attempt) : null });
-  } catch (error) {
-    logError(error, { event: "api_active_attempt_failed", traceId });
-    return NextResponse.json(
-      { error: "Failed to fetch active attempt", traceId },
-      { status: 400 }
-    );
-  }
+		return NextResponse.json({
+			attempt: attempt ? serializeAttempt(attempt) : null,
+		});
+	} catch (error) {
+		logError(error, { event: "api_active_attempt_failed", traceId });
+		return NextResponse.json(
+			{ error: "Failed to fetch active attempt", traceId },
+			{ status: 400 },
+		);
+	}
 }

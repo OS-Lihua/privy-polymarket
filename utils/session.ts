@@ -1,56 +1,56 @@
 export interface TradingSession {
-  eoaAddress: string;
-  depositWalletAddress?: string;
-  approvalSchemaVersion?: number;
-  isDepositWalletDeployed?: boolean;
-  hasApiCredentials: boolean;
-  hasApprovals: boolean;
-  apiCredentials?: {
-    key: string;
-    secret: string;
-    passphrase: string;
-  };
-  lastChecked: number;
+	eoaAddress: string;
+	depositWalletAddress?: string;
+	approvalSchemaVersion?: number;
+	isDepositWalletDeployed?: boolean;
+	hasApiCredentials: boolean;
+	hasApprovals: boolean;
+	apiCredentials?: {
+		key: string;
+		secret: string;
+		passphrase: string;
+	};
+	lastChecked: number;
 }
 
 export type SessionStep =
-  | "idle"
-  | "checking"
-  | "depositWallet"
-  | "credentials"
-  | "approvals"
-  | "complete";
+	| "idle"
+	| "checking"
+	| "depositWallet"
+	| "credentials"
+	| "approvals"
+	| "complete";
 
 export const loadSession = (address: string): TradingSession | null => {
-  const stored = localStorage.getItem(
-    `polymarket_trading_session_${address.toLowerCase()}`
-  );
-  if (!stored) return null;
+	const stored = localStorage.getItem(
+		`polymarket_trading_session_${address.toLowerCase()}`,
+	);
+	if (!stored) return null;
 
-  try {
-    const session = JSON.parse(stored) as TradingSession;
+	try {
+		const session = JSON.parse(stored) as TradingSession;
 
-    // Validate session belongs to this address
-    if (session.eoaAddress.toLowerCase() !== address.toLowerCase()) {
-      clearSession(address);
-      return null;
-    }
+		// Validate session belongs to this address
+		if (session.eoaAddress.toLowerCase() !== address.toLowerCase()) {
+			clearSession(address);
+			return null;
+		}
 
-    return session;
-  } catch {
-    return null;
-  }
+		return session;
+	} catch {
+		return null;
+	}
 };
 
 export const saveSession = (address: string, session: TradingSession): void => {
-  localStorage.setItem(
-    `polymarket_trading_session_${address.toLowerCase()}`,
-    JSON.stringify(session)
-  );
+	localStorage.setItem(
+		`polymarket_trading_session_${address.toLowerCase()}`,
+		JSON.stringify(session),
+	);
 };
 
 export const clearSession = (address: string): void => {
-  localStorage.removeItem(
-    `polymarket_trading_session_${address.toLowerCase()}`
-  );
+	localStorage.removeItem(
+		`polymarket_trading_session_${address.toLowerCase()}`,
+	);
 };

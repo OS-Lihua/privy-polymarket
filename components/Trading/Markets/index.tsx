@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { useTrading } from "@/providers/TradingProvider";
 import useMarkets from "@/hooks/useMarkets";
-import { type CategoryId, DEFAULT_CATEGORY, getCategoryById } from "@/constants/categories";
+import {
+	type CategoryId,
+	DEFAULT_CATEGORY,
+	getCategoryById,
+} from "@/constants/categories";
 
 import ErrorState from "@/components/shared/ErrorState";
 import EmptyState from "@/components/shared/EmptyState";
@@ -14,117 +18,121 @@ import OrderPlacementModal from "@/components/Trading/OrderModal";
 import { useI18n } from "@/lib/i18n";
 
 export default function HighVolumeMarkets() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<CategoryId>(DEFAULT_CATEGORY);
-  const [selectedOutcome, setSelectedOutcome] = useState<{
-    marketTitle: string;
-    outcome: string;
-    price: number;
-    tokenId: string;
-    negRisk: boolean;
-  } | null>(null);
-  const { t } = useI18n();
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [activeCategory, setActiveCategory] =
+		useState<CategoryId>(DEFAULT_CATEGORY);
+	const [selectedOutcome, setSelectedOutcome] = useState<{
+		marketTitle: string;
+		outcome: string;
+		price: number;
+		tokenId: string;
+		negRisk: boolean;
+	} | null>(null);
+	const { t } = useI18n();
 
-  const { clobClient, isGeoblocked, isTradingSessionComplete } = useTrading();
+	const { clobClient, isGeoblocked, isTradingSessionComplete } = useTrading();
 
-  const { data: markets, isLoading, error } = useMarkets({
-    limit: 10,
-    categoryId: activeCategory,
-  });
+	const {
+		data: markets,
+		isLoading,
+		error,
+	} = useMarkets({
+		limit: 10,
+		categoryId: activeCategory,
+	});
 
-  const category = getCategoryById(activeCategory);
-  const categoryLabel = category ? t(category.id) : t("markets");
+	const category = getCategoryById(activeCategory);
+	const categoryLabel = category ? t(category.id) : t("markets");
 
-  const handleOutcomeClick = (
-    marketTitle: string,
-    outcome: string,
-    price: number,
-    tokenId: string,
-    negRisk: boolean
-  ) => {
-    setSelectedOutcome({ marketTitle, outcome, price, tokenId, negRisk });
-    setIsModalOpen(true);
-  };
+	const handleOutcomeClick = (
+		marketTitle: string,
+		outcome: string,
+		price: number,
+		tokenId: string,
+		negRisk: boolean,
+	) => {
+		setSelectedOutcome({ marketTitle, outcome, price, tokenId, negRisk });
+		setIsModalOpen(true);
+	};
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedOutcome(null);
-  };
+	const handleCloseModal = () => {
+		setIsModalOpen(false);
+		setSelectedOutcome(null);
+	};
 
-  const handleCategoryChange = (categoryId: CategoryId) => {
-    setActiveCategory(categoryId);
-  };
+	const handleCategoryChange = (categoryId: CategoryId) => {
+		setActiveCategory(categoryId);
+	};
 
-  return (
-    <>
-      <div className="space-y-4">
-        {/* Category Tabs */}
-        <CategoryTabs
-          activeCategory={activeCategory}
-          onCategoryChange={handleCategoryChange}
-        />
+	return (
+		<>
+			<div className="space-y-4">
+				{/* Category Tabs */}
+				<CategoryTabs
+					activeCategory={activeCategory}
+					onCategoryChange={handleCategoryChange}
+				/>
 
-        {/* Header */}
-        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h3 className="text-base font-semibold tracking-tight">
-              {t("categoryMarkets", { category: categoryLabel })}{" "}
-              {markets ? `(${markets.length})` : ""}
-            </h3>
-            <p className="text-sm text-muted-foreground">{t("sortedMarkets")}</p>
-          </div>
-        </div>
+				{/* Header */}
+				<div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+					<div>
+						<h3 className="text-base font-semibold tracking-tight">
+							{t("categoryMarkets", { category: categoryLabel })}{" "}
+							{markets ? `(${markets.length})` : ""}
+						</h3>
+						<p className="text-sm text-muted-foreground">
+							{t("sortedMarkets")}
+						</p>
+					</div>
+				</div>
 
-        {!isTradingSessionComplete && !isGeoblocked && (
-          <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm text-warning">
-            {t("initializeBeforeOrder")}
-          </div>
-        )}
+				{!isTradingSessionComplete && !isGeoblocked && (
+					<div className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm text-warning">
+						{t("initializeBeforeOrder")}
+					</div>
+				)}
 
-        {/* Loading State */}
-        {isLoading && <LoadingState message={`${t("loadingMarkets")}...`} />}
+				{/* Loading State */}
+				{isLoading && <LoadingState message={`${t("loadingMarkets")}...`} />}
 
-        {/* Error State */}
-        {error && !isLoading && (
-          <ErrorState error={error} title={t("errorLoadingMarkets")} />
-        )}
+				{/* Error State */}
+				{error && !isLoading && (
+					<ErrorState error={error} title={t("errorLoadingMarkets")} />
+				)}
 
-        {/* Empty State */}
-        {!isLoading && !error && (!markets || markets.length === 0) && (
-          <EmptyState
-            title={t("noMarkets")}
-            message={t("noMarketsMessage")}
-          />
-        )}
+				{/* Empty State */}
+				{!isLoading && !error && (!markets || markets.length === 0) && (
+					<EmptyState title={t("noMarkets")} message={t("noMarketsMessage")} />
+				)}
 
-        {/* Market Cards */}
-        {!isLoading && !error && markets && markets.length > 0 && (
-          <div className="grid gap-3">
-            {markets.map((market) => (
-              <MarketCard
-                key={market.id}
-                market={market}
-                disabled={isGeoblocked || !isTradingSessionComplete}
-                onOutcomeClick={handleOutcomeClick}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+				{/* Market Cards */}
+				{!isLoading && !error && markets && markets.length > 0 && (
+					<div className="grid gap-3">
+						{markets.map((market) => (
+							<MarketCard
+								key={market.id}
+								market={market}
+								disabled={isGeoblocked || !isTradingSessionComplete}
+								onOutcomeClick={handleOutcomeClick}
+							/>
+						))}
+					</div>
+				)}
+			</div>
 
-      {/* Order Placement Modal */}
-      {selectedOutcome && (
-        <OrderPlacementModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          marketTitle={selectedOutcome.marketTitle}
-          outcome={selectedOutcome.outcome}
-          currentPrice={selectedOutcome.price}
-          tokenId={selectedOutcome.tokenId}
-          negRisk={selectedOutcome.negRisk}
-          clobClient={clobClient}
-        />
-      )}
-    </>
-  );
+			{/* Order Placement Modal */}
+			{selectedOutcome && (
+				<OrderPlacementModal
+					isOpen={isModalOpen}
+					onClose={handleCloseModal}
+					marketTitle={selectedOutcome.marketTitle}
+					outcome={selectedOutcome.outcome}
+					currentPrice={selectedOutcome.price}
+					tokenId={selectedOutcome.tokenId}
+					negRisk={selectedOutcome.negRisk}
+					clobClient={clobClient}
+				/>
+			)}
+		</>
+	);
 }

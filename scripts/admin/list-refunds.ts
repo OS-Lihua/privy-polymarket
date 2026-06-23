@@ -25,7 +25,7 @@ async function main() {
       refundErrorMessage: attempt.refundErrorMessage,
       feeTxHash: attempt.feeTxHash,
       updatedAt: attempt.updatedAt.toISOString(),
-    }))
+    })),
   );
 }
 

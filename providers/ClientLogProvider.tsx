@@ -5,16 +5,16 @@ import { usePrivy } from "@privy-io/react-auth";
 import { setClientLogAccessTokenGetter } from "@/lib/logger";
 
 export default function ClientLogProvider({
-  children,
+	children,
 }: {
-  children: ReactNode;
+	children: ReactNode;
 }) {
-  const { getAccessToken } = usePrivy();
+	const { getAccessToken } = usePrivy();
 
-  useEffect(() => {
-    setClientLogAccessTokenGetter(getAccessToken);
-    return () => setClientLogAccessTokenGetter(null);
-  }, [getAccessToken]);
+	useEffect(() => {
+		setClientLogAccessTokenGetter(getAccessToken);
+		return () => setClientLogAccessTokenGetter(null);
+	}, [getAccessToken]);
 
-  return children;
+	return children;
 }

@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
     parseInt(sigTimestamp),
     method,
     path,
-    body
+    body,
   );
 
   return NextResponse.json({
@@ -208,6 +208,7 @@ export async function POST(request: NextRequest) {
 - Required for builder order attribution (with ClobClient) or authentication (RelayClient)
 
 > **Security Note:** This reference implementation exposes builder credentials (API key + passphrase) to the client via the `/api/polymarket/sign` endpoint. For production deployments, implement one of:
+>
 > - **Proxy pattern** - Server makes all CLOB/Relay requests, credentials never reach client
 > - **Auth token validation** - Require authenticated session before returning credentials
 
@@ -234,7 +235,7 @@ const relayClient = new RelayClient(
   "https://relayer-v2.polymarket.com/",
   137, // Polygon chain ID
   ethersSigner,
-  builderConfig
+  builderConfig,
 );
 ```
 
@@ -270,7 +271,7 @@ import { ClobClient } from "@polymarket/clob-client";
 const tempClient = new ClobClient(
   "https://clob.polymarket.com",
   137, // Polygon chain ID
-  ethersSigner
+  ethersSigner,
 );
 
 // Try to derive existing credentials (for returning users)
@@ -344,7 +345,7 @@ if (approvalStatus.allApproved) {
   const response = await relayClient.executeDepositWalletBatch(
     approvalCalls,
     depositWalletAddress,
-    deadline
+    deadline,
   );
 
   await response.wait();
@@ -454,7 +455,7 @@ const clobClient = new ClobClient(
   depositWalletAddress, // Deposit Wallet funder address
   undefined, // mandatory placeholder
   false,
-  builderConfig // Builder order attribution
+  builderConfig, // Builder order attribution
 );
 ```
 
@@ -492,7 +493,7 @@ const order = {
 const response = await clobClient.createAndPostOrder(
   order,
   { negRisk: false }, // Market-specific flag
-  OrderType.GTC
+  OrderType.GTC,
 );
 
 console.log("Order ID:", response.orderID);
@@ -598,16 +599,16 @@ POLYMARKET_BUILDER_PASSPHRASE=your_builder_passphrase
 
 ## Key Dependencies
 
-| Package                                                                                                  | Version  | Purpose                                          |
-| -------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------ |
-| [`@privy-io/react-auth`](https://docs.privy.io/)                                                         | ^2.12.2  | Authentication / Embedded Wallet                 |
-| [`@polymarket/clob-client`](https://github.com/Polymarket/clob-client)                                   | ^4.22.8  | Order placement, User API credentials            |
+| Package                                                                                                  | Version  | Purpose                                                      |
+| -------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------ |
+| [`@privy-io/react-auth`](https://docs.privy.io/)                                                         | ^2.12.2  | Authentication / Embedded Wallet                             |
+| [`@polymarket/clob-client`](https://github.com/Polymarket/clob-client)                                   | ^4.22.8  | Order placement, User API credentials                        |
 | [`@polymarket/builder-relayer-client`](https://www.npmjs.com/package/@polymarket/builder-relayer-client) | ^0.0.6   | Deposit Wallet transactions, token approvals, CTF operations |
-| [`@polymarket/builder-signing-sdk`](https://www.npmjs.com/package/@polymarket/builder-signing-sdk)       | ^0.0.8   | Builder credential HMAC signatures               |
-| [`viem`](https://viem.sh/)                                                                               | ^2.39.2  | Ethereum interactions, RPC calls                 |
-| [`ethers`](https://docs.ethers.org/v5/)                                                                  | ^5.8.0   | Wallet signing, EIP-712 messages                 |
-| [`@tanstack/react-query`](https://tanstack.com/query)                                                    | ^5.90.10 | Server state management                          |
-| [`next`](https://nextjs.org/)                                                                            | ^16.0.10 | React framework, API routes                      |
+| [`@polymarket/builder-signing-sdk`](https://www.npmjs.com/package/@polymarket/builder-signing-sdk)       | ^0.0.8   | Builder credential HMAC signatures                           |
+| [`viem`](https://viem.sh/)                                                                               | ^2.39.2  | Ethereum interactions, RPC calls                             |
+| [`ethers`](https://docs.ethers.org/v5/)                                                                  | ^5.8.0   | Wallet signing, EIP-712 messages                             |
+| [`@tanstack/react-query`](https://tanstack.com/query)                                                    | ^5.90.10 | Server state management                                      |
+| [`next`](https://nextjs.org/)                                                                            | ^16.0.10 | React framework, API routes                                  |
 
 ---
 

@@ -1,7 +1,7 @@
 allowBuilds:
-  '@prisma/client': true
-  '@prisma/engines': true
-  '@reown/appkit': true
+  "@prisma/client": true
+  "@prisma/engines": true
+  "@reown/appkit": true
   bufferutil: true
   esbuild: true
   keccak: true
