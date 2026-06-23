@@ -48,7 +48,10 @@ export default function Home() {
 
 				{eoaAddress && <MarketTabs />}
 
-				<OnboardingGuide enabled={Boolean(eoaAddress)} />
+				<OnboardingGuide
+					enabled={Boolean(eoaAddress)}
+					isInitialized={Boolean(isTradingSessionComplete)}
+				/>
 			</div>
 		</div>
 	);

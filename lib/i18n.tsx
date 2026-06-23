@@ -24,6 +24,7 @@ const dictionaries = {
     eoaWallet: "EOA wallet",
     safeWallet: "Safe Address",
     depositWallet: "Deposit Wallet",
+    depositWalletPending: "Initialize first",
     copied: "Copied",
     profile: "Polymarket profile",
     profileUnavailable:
@@ -33,7 +34,7 @@ const dictionaries = {
     safeHelp:
       "Deterministic Safe address shown for comparison only. Trading uses the Deposit Wallet.",
     depositWalletHelp:
-      "This wallet holds CLOB V2 trading funds. Fund this address with Polygon pUSD.",
+      "This wallet is generated during initialization and holds CLOB V2 trading funds. Fund this address with Polygon pUSD.",
     tradingBalance: "Trading Balance",
     loadingBalance: "Loading balance",
     errorLoadingBalance: "Error loading balance",
@@ -114,16 +115,19 @@ const dictionaries = {
     geoblockedBody:
       "You can view markets, but cannot place trades or initialize a trading session.",
     detectedRegion: "Detected region",
-    tourSafeAddressTitle: "1. Find your Deposit Wallet",
-    tourSafeAddressBody:
-      "This is the Deposit Wallet address used for trading. Copy this address when you fund the account.",
+    tourWalletsTitle: "1. Review the wallets",
+    tourWalletsBody:
+      "The top-right wallet panel shows the signing wallet, the demo Safe address, and the Deposit Wallet slot. The Deposit Wallet is created during initialization.",
+    tourSessionTitle: "2. Initialize trading",
+    tourSessionBody:
+      "Initialize before funding or trading. This creates the Deposit Wallet, stores Polymarket API credentials, and approves tokens.",
+    tourDepositWalletTitle: "1. Fund the Deposit Wallet",
+    tourDepositWalletBody:
+      "The top-right Deposit Wallet is the address users send Polygon pUSD to. Do not fund the signing wallet or the demo Safe address.",
     tourDepositTitle: "2. Check balance and token",
     tourDepositBody:
       "This panel shows the pUSD balance. Fund the Deposit Wallet with Polygon pUSD, or wrap USDC.e into pUSD before placing orders.",
-    tourSessionTitle: "3. Initialize trading",
-    tourSessionBody:
-      "Deploy the Deposit Wallet if needed, create Polymarket API credentials, and approve tokens.",
-    tourOrderTitle: "4. Place an order",
+    tourOrderTitle: "3. Place an order",
     tourOrderBody:
       "Pick an active market, request a final quote, pay the platform fee, then submit the order.",
     tourNext: "Next",
@@ -142,13 +146,14 @@ const dictionaries = {
     eoaWallet: "签名钱包",
     safeWallet: "Safe 地址",
     depositWallet: "交易钱包",
+    depositWalletPending: "先初始化",
     copied: "已复制",
     profile: "Polymarket 主页",
     profileUnavailable: "这个 Privy 钱包没有对应的 Polymarket.com 主页。",
     eoaHelp: "这个钱包只用来签名，不要往这里充值。",
     safeHelp: "这是用于对比展示的确定性 Safe 地址。真实交易使用交易钱包。",
     depositWalletHelp:
-      "这个钱包存放 CLOB V2 交易资金。充值 Polygon pUSD 到这里。",
+      "这个钱包会在初始化时生成，用来存放 CLOB V2 交易资金。充值 Polygon pUSD 到这里。",
     tradingBalance: "交易余额",
     loadingBalance: "正在读取余额",
     errorLoadingBalance: "余额读取失败",
@@ -226,15 +231,19 @@ const dictionaries = {
     geoblockedTitle: "你所在地区暂不可交易",
     geoblockedBody: "你可以查看市场，但不能下单或初始化交易会话。",
     detectedRegion: "检测地区",
-    tourSafeAddressTitle: "1. 找到你的交易钱包",
-    tourSafeAddressBody:
-      "这是实际用于交易的 Deposit Wallet 地址。充值时复制这个地址。",
+    tourWalletsTitle: "1. 先看右上角的钱包",
+    tourWalletsBody:
+      "右上角会显示签名钱包、用于对比展示的 Safe 地址，以及交易钱包位置。交易钱包要初始化后才会生成。",
+    tourSessionTitle: "2. 初始化交易",
+    tourSessionBody:
+      "先初始化，再充值和下单。初始化会生成交易钱包、保存 Polymarket API 凭证，并完成代币授权。",
+    tourDepositWalletTitle: "1. 给交易钱包充值",
+    tourDepositWalletBody:
+      "右上角的交易钱包才是用户转账充值的地址。不要充值到签名钱包，也不要充值到展示用的 Safe 地址。",
     tourDepositTitle: "2. 查看余额和充值币种",
     tourDepositBody:
       "这里显示 pUSD 余额。下单前需要向交易钱包充值 Polygon pUSD，或把 USDC.e 包装成 pUSD。",
-    tourSessionTitle: "3. 初始化",
-    tourSessionBody: "部署交易钱包、创建 Polymarket API 凭证，并完成代币授权。",
-    tourOrderTitle: "4. 下单",
+    tourOrderTitle: "3. 下单",
     tourOrderBody: "选择活跃市场，获取最终报价，支付平台手续费，然后提交订单。",
     tourNext: "下一步",
     tourBack: "上一步",

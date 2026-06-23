@@ -25,7 +25,10 @@ export default function WalletInfo({
 		useAddressCopy(depositWalletAddress || null);
 
 	return (
-		<div className="min-w-72 rounded-lg border border-border bg-panel p-3">
+		<div
+			className="min-w-72 rounded-lg border border-border bg-panel p-3"
+			data-tour="wallet-overview"
+		>
 			<div className="flex flex-col gap-3">
 				{/* EOA Wallet */}
 				<div className="flex flex-col sm:flex-row items-center gap-3 justify-between">
@@ -50,6 +53,7 @@ export default function WalletInfo({
 							<InfoTooltip text={t("safeHelp")} />
 						</div>
 						<button
+							type="button"
 							onClick={copySafeAddress}
 							className="w-full rounded-md border border-primary/25 bg-primary/10 px-4 py-2 text-center font-mono text-sm text-primary transition-colors select-none hover:bg-primary/15 sm:w-auto"
 						>
@@ -60,15 +64,16 @@ export default function WalletInfo({
 					</div>
 				)}
 
-				{depositWalletAddress && (
-					<div className="flex flex-col sm:flex-row items-center gap-3 justify-between">
-						<div className="flex items-center gap-2">
-							<span className="text-sm text-success font-medium">
-								{t("depositWallet")}
-							</span>
-							<InfoTooltip text={t("depositWalletHelp")} />
-						</div>
+				<div className="flex flex-col sm:flex-row items-center gap-3 justify-between">
+					<div className="flex items-center gap-2">
+						<span className="text-sm text-success font-medium">
+							{t("depositWallet")}
+						</span>
+						<InfoTooltip text={t("depositWalletHelp")} />
+					</div>
+					{depositWalletAddress ? (
 						<button
+							type="button"
 							onClick={copyDepositWalletAddress}
 							className="w-full rounded-md border border-success/25 bg-success/10 px-4 py-2 text-center font-mono text-sm text-success transition-colors select-none hover:bg-success/15 sm:w-auto"
 						>
@@ -76,13 +81,18 @@ export default function WalletInfo({
 								? t("copied")
 								: formatAddress(depositWalletAddress)}
 						</button>
-					</div>
-				)}
+					) : (
+						<div className="w-full rounded-md border border-warning/25 bg-warning/10 px-4 py-2 text-center text-sm font-medium text-warning sm:w-auto">
+							{t("depositWalletPending")}
+						</div>
+					)}
+				</div>
 
 				{/* Action buttons */}
 				<div className="flex flex-col sm:flex-row items-center gap-3 justify-between pt-2 border-t border-border">
 					<div className="relative group w-full sm:w-auto">
 						<button
+							type="button"
 							disabled
 							className="w-full rounded-md border border-border bg-muted px-4 py-2 text-center font-medium text-muted-foreground opacity-60 cursor-not-allowed sm:w-auto"
 						>

@@ -7,35 +7,46 @@ import { cn } from "@/utils/classNames";
 type TourStep = {
 	target: string;
 	titleKey:
-		| "tourSafeAddressTitle"
+		| "tourWalletsTitle"
+		| "tourDepositWalletTitle"
 		| "tourDepositTitle"
 		| "tourSessionTitle"
 		| "tourOrderTitle";
 	bodyKey:
-		| "tourSafeAddressBody"
+		| "tourWalletsBody"
+		| "tourDepositWalletBody"
 		| "tourDepositBody"
 		| "tourSessionBody"
 		| "tourOrderBody";
 	placement: "bottom" | "top";
 };
 
-const steps: TourStep[] = [
+const preInitSteps: TourStep[] = [
 	{
-		target: "[data-tour='safe-address']",
-		titleKey: "tourSafeAddressTitle",
-		bodyKey: "tourSafeAddressBody",
-		placement: "bottom",
-	},
-	{
-		target: "[data-tour='deposit-balance']",
-		titleKey: "tourDepositTitle",
-		bodyKey: "tourDepositBody",
+		target: "[data-tour='wallet-overview']",
+		titleKey: "tourWalletsTitle",
+		bodyKey: "tourWalletsBody",
 		placement: "bottom",
 	},
 	{
 		target: "[data-tour='session']",
 		titleKey: "tourSessionTitle",
 		bodyKey: "tourSessionBody",
+		placement: "bottom",
+	},
+];
+
+const postInitSteps: TourStep[] = [
+	{
+		target: "[data-tour='wallet-overview']",
+		titleKey: "tourDepositWalletTitle",
+		bodyKey: "tourDepositWalletBody",
+		placement: "bottom",
+	},
+	{
+		target: "[data-tour='deposit-balance']",
+		titleKey: "tourDepositTitle",
+		bodyKey: "tourDepositBody",
 		placement: "bottom",
 	},
 	{
@@ -46,20 +57,33 @@ const steps: TourStep[] = [
 	},
 ];
 
-export default function OnboardingGuide({ enabled }: { enabled: boolean }) {
+export default function OnboardingGuide({
+	enabled,
+	isInitialized,
+}: {
+	enabled: boolean;
+	isInitialized: boolean;
+}) {
 	const { t } = useI18n();
 	const [isOpen, setIsOpen] = useState(false);
 	const [stepIndex, setStepIndex] = useState(0);
 	const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
 
+	const steps = isInitialized ? postInitSteps : preInitSteps;
 	const step = steps[stepIndex];
+	const storageKey = isInitialized
+		? "tradingPostInitGuideSeen"
+		: "tradingPreInitGuideSeen";
 
 	useEffect(() => {
 		if (!enabled) return;
 
-		const seen = window.localStorage.getItem("tradingGuideSeen") === "true";
+		const seen =
+			window.localStorage.getItem(storageKey) === "true" ||
+			window.localStorage.getItem("tradingGuideSeen") === "true";
+		setStepIndex(0);
 		if (!seen) setIsOpen(true);
-	}, [enabled]);
+	}, [enabled, storageKey]);
 
 	useEffect(() => {
 		if (!isOpen) return;
@@ -115,7 +139,7 @@ export default function OnboardingGuide({ enabled }: { enabled: boolean }) {
 	if (!enabled) return null;
 
 	const finish = () => {
-		window.localStorage.setItem("tradingGuideSeen", "true");
+		window.localStorage.setItem(storageKey, "true");
 		setIsOpen(false);
 		setStepIndex(0);
 	};
