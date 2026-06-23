@@ -12,8 +12,7 @@ export default function useSafeDeployment(eoaAddress?: string) {
     try {
       const config = getContractConfig(POLYGON_CHAIN_ID);
       return deriveSafe(eoaAddress, config.SafeContracts.SafeFactory);
-    } catch (err) {
-      console.error("Error deriving Safe address:", err);
+    } catch {
       return undefined;
     }
   }, [eoaAddress]);

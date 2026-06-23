@@ -28,7 +28,6 @@ export default function useRedeemPosition() {
         const error =
           err instanceof Error ? err : new Error("Failed to redeem position");
         setError(error);
-        console.error("Redeem error:", error);
         throw error;
       } finally {
         setIsRedeeming(false);

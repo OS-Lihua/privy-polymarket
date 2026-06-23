@@ -4,6 +4,7 @@ import { useState } from "react";
 import useClobOrder from "@/hooks/useClobOrder";
 import useActiveOrders from "@/hooks/useActiveOrders";
 import { useTrading } from "@/providers/TradingProvider";
+import { logger, serializeError } from "@/lib/logger";
 
 import ErrorState from "@/components/shared/ErrorState";
 import EmptyState from "@/components/shared/EmptyState";
@@ -31,7 +32,11 @@ export default function ActiveOrders() {
     try {
       await cancelOrder(orderId);
     } catch (err) {
-      console.error("Failed to cancel order:", err);
+      logger.warn({
+        event: "active_order_cancel_failed",
+        orderId,
+        error: serializeError(err),
+      });
       alert("Failed to cancel order. Please try again.");
     } finally {
       setCancellingId(null);

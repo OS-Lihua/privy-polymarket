@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { RelayClient } from "@polymarket/builder-relayer-client";
 import { checkAllApprovals, createAllApprovalCalls } from "@/utils/approvals";
+import { logger, serializeError } from "@/lib/logger";
 
 // Uses relayClient to set all required token approvals for trading
 
@@ -29,7 +30,10 @@ export default function useTokenApprovals() {
         await response.wait();
         return true;
       } catch (err) {
-        console.error("Failed to set all token approvals:", err);
+        logger.warn({
+          event: "token_approvals_set_failed",
+          error: serializeError(err),
+        });
         return false;
       }
     },

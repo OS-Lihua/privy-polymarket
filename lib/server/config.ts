@@ -1,22 +1,46 @@
 import { getAddress } from "viem";
+import {
+  CLOB_API_URL as DEFAULT_CLOB_API_URL,
+  GAMMA_API_URL as DEFAULT_GAMMA_API_URL,
+} from "@/constants/api";
+import {
+  NEG_RISK_ADAPTER_ADDRESS as DEFAULT_NEG_RISK_ADAPTER_ADDRESS,
+  PUSD_CONTRACT_ADDRESS as DEFAULT_PUSD_ADDRESS,
+  USDC_E_CONTRACT_ADDRESS as DEFAULT_USDC_E_ADDRESS,
+} from "@/constants/tokens";
 
 export const USDC_E_ADDRESS = getAddress(
-  "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
+  process.env.USDC_E_CONTRACT_ADDRESS ||
+    process.env.NEXT_PUBLIC_USDC_E_CONTRACT_ADDRESS ||
+    DEFAULT_USDC_E_ADDRESS
 );
 
 export const PUSD_ADDRESS = getAddress(
-  "0xC011a7E12a19f7B1f670d46F03B03f3342E82DFB"
+  process.env.PUSD_CONTRACT_ADDRESS ||
+    process.env.NEXT_PUBLIC_PUSD_CONTRACT_ADDRESS ||
+    DEFAULT_PUSD_ADDRESS
 );
 
 export const NEG_RISK_ADAPTER_ADDRESS = getAddress(
-  "0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296"
+  process.env.NEG_RISK_ADAPTER_ADDRESS ||
+    process.env.NEXT_PUBLIC_NEG_RISK_ADAPTER_ADDRESS ||
+    DEFAULT_NEG_RISK_ADAPTER_ADDRESS
 );
 
-export const CLOB_API_URL = "https://clob.polymarket.com";
-export const GAMMA_API_URL = "https://gamma-api.polymarket.com";
-export const POLYGON_CHAIN_ID = 137;
-export const SLIPPAGE_BPS = 200;
-export const QUOTE_TTL_MS = 60_000;
+export const CLOB_API_URL =
+  process.env.CLOB_API_URL ||
+  process.env.NEXT_PUBLIC_CLOB_API_URL ||
+  DEFAULT_CLOB_API_URL;
+export const GAMMA_API_URL =
+  process.env.GAMMA_API_URL ||
+  process.env.NEXT_PUBLIC_GAMMA_API_URL ||
+  DEFAULT_GAMMA_API_URL;
+export const POLYGON_CHAIN_ID = parseIntegerEnv(
+  "POLYGON_CHAIN_ID",
+  Number(process.env.NEXT_PUBLIC_POLYGON_CHAIN_ID || "137")
+);
+export const SLIPPAGE_BPS = parseIntegerEnv("SLIPPAGE_BPS", 200);
+export const QUOTE_TTL_MS = parseIntegerEnv("QUOTE_TTL_MS", 60_000);
 
 export const TERMINAL_ATTEMPT_STATUSES = [
   "order_filled",

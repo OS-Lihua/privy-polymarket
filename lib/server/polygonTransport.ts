@@ -1,11 +1,10 @@
 import { fallback, http } from "viem";
-import { POLYGON_FALLBACK_RPC_URLS } from "@/constants/polymarket";
 import { getPolygonRpcUrl } from "@/lib/server/config";
 
 export function serverPolygonTransport() {
   const urls = uniqueRpcUrls([
     getPolygonRpcUrl(),
-    ...POLYGON_FALLBACK_RPC_URLS,
+    ...getServerPolygonFallbackRpcUrls(),
   ]);
 
   return fallback(
@@ -23,4 +22,15 @@ export function serverPolygonTransport() {
 
 function uniqueRpcUrls(urls: readonly string[]) {
   return urls.filter((url, index) => url && urls.indexOf(url) === index);
+}
+
+function getServerPolygonFallbackRpcUrls() {
+  return (
+    process.env.POLYGON_FALLBACK_RPC_URLS ||
+    process.env.NEXT_PUBLIC_POLYGON_FALLBACK_RPC_URLS ||
+    "https://polygon-rpc.com,https://rpc.ankr.com/polygon,https://polygon-bor-rpc.publicnode.com,https://polygon.drpc.org"
+  )
+    .split(",")
+    .map((url) => url.trim())
+    .filter(Boolean);
 }

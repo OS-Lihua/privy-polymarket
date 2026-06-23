@@ -1,0 +1,30 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.0/schema.json",
+  "files": {
+    "includes": [
+      "app/**/*.ts",
+      "app/**/*.tsx",
+      "components/**/*.ts",
+      "components/**/*.tsx",
+      "hooks/**/*.ts",
+      "lib/**/*.ts",
+      "providers/**/*.ts",
+      "providers/**/*.tsx",
+      "utils/**/*.ts"
+    ]
+  },
+  "formatter": {
+    "enabled": false
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "suspicious": {
+        "noConsole": "error"
+      }
+    }
+  },
+  "assist": {
+    "enabled": false
+  }
+}

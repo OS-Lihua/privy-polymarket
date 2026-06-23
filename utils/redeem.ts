@@ -50,14 +50,6 @@ export const createRedeemCall = (params: RedeemParams): DepositWalletCall => {
     const amounts: bigint[] = [BigInt(0), BigInt(0)];
     amounts[outcomeIndex] = tokenAmount;
 
-    console.log("Creating NegRisk redeem tx:", {
-      conditionId,
-      outcomeIndex,
-      size,
-      tokenAmount: tokenAmount.toString(),
-      amounts: amounts.map((a) => a.toString()),
-    });
-
     const data = encodeFunctionData({
       abi: negRiskAdapterAbi,
       functionName: "redeemPositions",
@@ -74,12 +66,6 @@ export const createRedeemCall = (params: RedeemParams): DepositWalletCall => {
   const parentCollectionId = "0x" + "0".repeat(64);
 
   const indexSet = BigInt(1 << outcomeIndex);
-
-  console.log("Creating regular CTF redeem tx:", {
-    conditionId,
-    outcomeIndex,
-    indexSet: indexSet.toString(),
-  });
 
   const data = encodeFunctionData({
     abi: ctfAbi,

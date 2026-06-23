@@ -19,7 +19,7 @@ export async function GET() {
         status: response.status,
       });
       return NextResponse.json(
-        { error: `Geoblock API error: ${response.status}` },
+        { error: "Failed to check geoblock" },
         { status: 502 }
       );
     }

@@ -17,6 +17,7 @@ import PositionFilters from "@/components/Trading/Positions/PositionFilters";
 import { createPollingInterval } from "@/utils/polling";
 import { DUST_THRESHOLD } from "@/constants/validation";
 import { POLLING_DURATION, POLLING_INTERVAL } from "@/constants/query";
+import { logger, serializeError } from "@/lib/logger";
 
 export default function UserPositions() {
   const { clobClient, relayClient, depositWalletAddress } = useTrading();
@@ -93,7 +94,11 @@ export default function UserPositions() {
         });
       }, POLLING_DURATION);
     } catch (err) {
-      console.error("Failed to sell position:", err);
+      logger.warn({
+        event: "position_sell_failed",
+        tokenId: position.asset,
+        error: serializeError(err),
+      });
       alert("Failed to sell position. Please try again.");
     } finally {
       setSellingAsset(null);
@@ -131,7 +136,11 @@ export default function UserPositions() {
         POLLING_DURATION
       );
     } catch (err) {
-      console.error("Failed to redeem position:", err);
+      logger.warn({
+        event: "position_redeem_failed",
+        tokenId: position.asset,
+        error: serializeError(err),
+      });
       alert("Failed to redeem position. Please try again.");
     } finally {
       setRedeemingAsset(null);

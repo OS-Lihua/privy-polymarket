@@ -1,36 +1,20 @@
-import pino from "pino";
-
 type LogContext = Record<string, unknown>;
+type LogLevel = "debug" | "info" | "warn" | "error";
 
-const REDACT_PATHS = [
-  "authorization",
-  "Authorization",
-  "headers.Authorization",
-  "headers.authorization",
-  "POLY_SIGNATURE",
-  "POLY_API_KEY",
-  "POLY_PASSPHRASE",
-  "POLY_BUILDER_SIGNATURE",
-  "POLY_BUILDER_API_KEY",
-  "POLY_BUILDER_PASSPHRASE",
-  "*.signature",
-  "*.secret",
-  "*.passphrase",
-  "*.apiKey",
-  "*.key",
-];
+let accessTokenGetter: (() => Promise<string | null>) | null = null;
 
-export const logger = pino({
-  name: "privy-polymarket",
-  level: process.env.NEXT_PUBLIC_LOG_LEVEL || "info",
-  redact: {
-    paths: REDACT_PATHS,
-    censor: "[redacted]",
-  },
-  browser: {
-    asObject: false,
-  },
-});
+export function setClientLogAccessTokenGetter(
+  getter: (() => Promise<string | null>) | null
+) {
+  accessTokenGetter = getter;
+}
+
+export const logger = {
+  debug: (context: LogContext) => writeClientLog("debug", context),
+  info: (context: LogContext) => writeClientLog("info", context),
+  warn: (context: LogContext) => writeClientLog("warn", context),
+  error: (context: LogContext) => writeClientLog("error", context),
+};
 
 export function createTraceId() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -59,6 +43,75 @@ export function serializeError(error: unknown) {
   }
 
   return error;
+}
+
+function writeClientLog(level: LogLevel, context: LogContext) {
+  const payload = sanitizeForClientLog({
+    level,
+    timestamp: new Date().toISOString(),
+    ...context,
+  });
+
+  if (typeof window === "undefined" || !accessTokenGetter) return;
+
+  void accessTokenGetter()
+    .then((token) => {
+      if (!token) return;
+
+      const body = JSON.stringify(payload);
+      void fetch("/api/logs/client", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body,
+        keepalive: true,
+      }).catch(() => undefined);
+    })
+    .catch(() => undefined);
+}
+
+function sanitizeForClientLog(value: unknown): unknown {
+  if (typeof value === "string") return sanitizeString(value);
+  if (!value || typeof value !== "object") return value;
+  if (Array.isArray(value)) return value.slice(0, 20).map(sanitizeForClientLog);
+
+  const output: Record<string, unknown> = {};
+  for (const [key, nestedValue] of Object.entries(value)) {
+    if (isSensitiveKey(key)) {
+      output[key] = "[redacted]";
+      continue;
+    }
+
+    output[key] = sanitizeForClientLog(nestedValue);
+  }
+
+  return output;
+}
+
+function sanitizeString(value: string) {
+  return value.replace(/0x[a-fA-F0-9]{40}/g, (address) =>
+    `${address.slice(0, 6)}...${address.slice(-4)}`
+  );
+}
+
+function isSensitiveKey(key: string) {
+  const normalized = key.toLowerCase();
+  return (
+    normalized === "token" ||
+    normalized === "accesstoken" ||
+    normalized === "authtoken" ||
+    normalized.includes("secret") ||
+    normalized.includes("passphrase") ||
+    normalized.includes("privatekey") ||
+    normalized.includes("authorization") ||
+    normalized.includes("signature") ||
+    normalized.includes("apikey") ||
+    normalized.includes("api_key") ||
+    normalized === "key" ||
+    normalized.includes("buildercreds")
+  );
 }
 
 function readObjectFields(value: Error) {

@@ -69,8 +69,7 @@ const checkPusdApprovalForSpender = async (
 
     const threshold = BigInt("1000000000000");
     return allowance >= threshold;
-  } catch (error) {
-    console.warn(`Failed to check pUSD approval for ${spender}:`, error);
+  } catch {
     return false;
   }
 };
@@ -88,8 +87,7 @@ const checkERC1155ApprovalForSpender = async (
     });
 
     return isApproved;
-  } catch (error) {
-    console.warn(`Failed to check ERC1155 approval for ${spender}:`, error);
+  } catch {
     return false;
   }
 };

@@ -3,6 +3,7 @@ import { Chain, ClobClient } from "@polymarket/clob-client-v2";
 import { usePrivy } from "@privy-io/react-auth";
 import { useWallet } from "@/providers/WalletContext";
 import { CLOB_API_URL } from "@/constants/polymarket";
+import { logger, serializeError } from "@/lib/logger";
 
 export interface UserApiCredentials {
   key: string;
@@ -41,11 +42,15 @@ export default function useUserApiCredentials() {
       });
 
       try {
-        console.log("Creating or deriving User API Credentials...");
+        logger.info({
+          event: "user_api_credentials_create_or_derive_started",
+        });
         const credentials =
           (await tempClient.createOrDeriveApiKey()) as ApiKeyResponse;
         if (hasCredentials(credentials)) {
-          console.log("Successfully prepared User API Credentials");
+          logger.info({
+            event: "user_api_credentials_create_or_derive_succeeded",
+          });
           return credentials;
         }
 
@@ -53,7 +58,10 @@ export default function useUserApiCredentials() {
           String(credentials.error || "Failed to get API credentials")
         );
       } catch (err) {
-        console.error("Failed to get credentials:", err);
+        logger.error({
+          event: "user_api_credentials_create_or_derive_failed",
+          error: serializeError(err),
+        });
         throw err;
       }
     }, [eoaAddress, walletClient]);
@@ -80,6 +88,8 @@ export default function useUserApiCredentials() {
       const token = await getAccessToken();
       if (!token) throw new Error("Missing Privy access token");
 
+      logger.info({ event: "builder_credentials_store_started" });
+
       const response = await fetch("/api/polymarket/builder-credentials", {
         method: "POST",
         headers: {
@@ -101,6 +111,7 @@ export default function useUserApiCredentials() {
         );
       }
 
+      logger.info({ event: "builder_credentials_store_succeeded" });
       return builderCreds;
     },
     [eoaAddress, getAccessToken, walletClient]
@@ -125,7 +136,12 @@ export default function useUserApiCredentials() {
       );
     }
 
-    return Boolean(body.configured);
+    const configured = Boolean(body.configured);
+    logger.info({
+      event: "builder_credentials_status_checked",
+      configured,
+    });
+    return configured;
   }, [getAccessToken]);
 
   return {

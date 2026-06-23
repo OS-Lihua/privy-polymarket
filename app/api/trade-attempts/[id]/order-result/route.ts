@@ -68,7 +68,7 @@ export async function POST(
   } catch (error) {
     logError(error, { event: "api_order_result_failed", traceId });
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to record order result" },
+      { error: "Failed to record order result", traceId },
       { status: 400 }
     );
   }

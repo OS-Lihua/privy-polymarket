@@ -3,6 +3,7 @@ import { getAddress, isAddress } from "viem";
 import type { BuilderApiKeyCreds } from "@polymarket/builder-signing-sdk";
 import { requirePrivyAuth } from "@/lib/server/auth";
 import { saveUserBuilderCredentials } from "@/lib/server/builder-credentials";
+import { logger, logError } from "@/lib/server/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,16 +17,17 @@ export async function POST(request: NextRequest) {
       eoaAddress,
       builderCreds,
     });
+    logger.info({
+      event: "api_builder_credentials_stored",
+      privyUserId: auth.privyUserId,
+      eoaAddress,
+    });
 
     return NextResponse.json({ configured: true });
   } catch (error) {
+    logError(error, { event: "api_builder_credentials_store_failed" });
     return NextResponse.json(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to save builder credentials",
-      },
+      { error: "Failed to save builder credentials" },
       { status: 400 }
     );
   }

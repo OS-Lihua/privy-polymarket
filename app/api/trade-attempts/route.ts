@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     logError(error, { event: "api_attempt_create_failed", traceId });
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to create attempt" },
+      { error: "Failed to create attempt", traceId },
       { status: 400 }
     );
   }

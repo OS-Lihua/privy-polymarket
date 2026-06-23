@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const POLYMARKET_DATA_API = "https://data-api.polymarket.com";
+import { POLYMARKET_DATA_API_URL } from "@/constants/api";
+import { logError } from "@/lib/server/logger";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       limit: "500",
     });
 
-    const response = await fetch(`${POLYMARKET_DATA_API}/positions?${params}`, {
+    const response = await fetch(`${POLYMARKET_DATA_API_URL}/positions?${params}`, {
       headers: { "Content-Type": "application/json" },
       cache: "no-store",
     });
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Position fetch error:", error);
+    logError(error, { event: "api_positions_failed" });
     return NextResponse.json(
       { error: "Failed to fetch positions" },
       { status: 500 }

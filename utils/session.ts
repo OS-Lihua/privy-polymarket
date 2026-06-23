@@ -32,14 +32,12 @@ export const loadSession = (address: string): TradingSession | null => {
 
     // Validate session belongs to this address
     if (session.eoaAddress.toLowerCase() !== address.toLowerCase()) {
-      console.warn("Session address mismatch, clearing invalid session");
       clearSession(address);
       return null;
     }
 
     return session;
-  } catch (e) {
-    console.error("Failed to parse session:", e);
+  } catch {
     return null;
   }
 };

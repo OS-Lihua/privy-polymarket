@@ -3,8 +3,11 @@ import { BLOCKING_ATTEMPT_STATUSES } from "@/lib/server/config";
 import { requirePrivyAuth } from "@/lib/server/auth";
 import { prisma } from "@/lib/server/prisma";
 import { serializeAttempt } from "@/lib/server/serialize";
+import { getTraceId, logError } from "@/lib/server/logger";
 
 export async function GET(request: NextRequest) {
+  const traceId = getTraceId(request.headers);
+
   try {
     const auth = await requirePrivyAuth(request);
     const depositWalletAddress =
@@ -24,8 +27,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ attempt: attempt ? serializeAttempt(attempt) : null });
   } catch (error) {
+    logError(error, { event: "api_active_attempt_failed", traceId });
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to fetch active attempt" },
+      { error: "Failed to fetch active attempt", traceId },
       { status: 400 }
     );
   }

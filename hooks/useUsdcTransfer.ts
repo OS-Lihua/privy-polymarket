@@ -41,7 +41,6 @@ export default function useUsdcTransfer() {
         const error =
           err instanceof Error ? err : new Error("Failed to transfer pUSD");
         setError(error);
-        console.error("Transfer error:", error);
         throw error;
       } finally {
         setIsTransferring(false);

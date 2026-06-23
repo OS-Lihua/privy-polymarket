@@ -13,11 +13,14 @@ import { prisma } from "@/lib/server/prisma";
 import { serializeAttempt } from "@/lib/server/serialize";
 import { verifyUsdcTransfer } from "@/lib/server/onchain";
 import { executeAutomaticRefund } from "@/lib/server/refunds";
+import { getTraceId, logger, logError } from "@/lib/server/logger";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const traceId = getTraceId(request.headers);
+
   try {
     const auth = await requirePrivyAuth(request);
     const { id } = await params;
@@ -38,6 +41,12 @@ export async function POST(
       const updated = await prisma.tradeAttempt.update({
         where: { id },
         data: { status: "cancelled" },
+      });
+      logger.info({
+        event: "api_attempt_cancelled",
+        traceId,
+        attemptId: id,
+        status: updated.status,
       });
 
       return NextResponse.json({ attempt: serializeAttempt(updated) });
@@ -60,6 +69,12 @@ export async function POST(
             errorMessage: "Cancelled before fee transaction was verified",
           },
         });
+        logger.info({
+          event: "api_attempt_cancelled_before_fee_verified",
+          traceId,
+          attemptId: id,
+          status: updated.status,
+        });
         return NextResponse.json({ attempt: serializeAttempt(updated) });
       }
     }
@@ -75,6 +90,12 @@ export async function POST(
           refundErrorMessage: "Automatic refunds are disabled",
         },
       });
+      logger.warn({
+        event: "api_attempt_refund_review_required",
+        traceId,
+        attemptId: id,
+        reason: "auto_refund_disabled",
+      });
       return NextResponse.json({ attempt: serializeAttempt(updated) });
     }
 
@@ -87,6 +108,12 @@ export async function POST(
           refundNetUsdcMicros: attempt.feeAmountUsdcMicros,
           refundErrorMessage: "Automatic refund rate limit exceeded",
         },
+      });
+      logger.warn({
+        event: "api_attempt_refund_review_required",
+        traceId,
+        attemptId: id,
+        reason: "auto_refund_rate_limited",
       });
       return NextResponse.json({ attempt: serializeAttempt(updated) });
     }
@@ -117,11 +144,20 @@ export async function POST(
             refundErrorMessage: refund.errorMessage,
           },
     });
+    logger[refund.ok ? "info" : "warn"]({
+      event: refund.ok ? "api_attempt_refund_paid" : "api_attempt_refund_review_required",
+      traceId,
+      attemptId: id,
+      status: updated.status,
+      refundTxHash: updated.refundTxHash,
+      refundErrorMessage: updated.refundErrorMessage,
+    });
 
     return NextResponse.json({ attempt: serializeAttempt(updated) });
   } catch (error) {
+    logError(error, { event: "api_attempt_cancel_failed", traceId });
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to cancel attempt" },
+      { error: "Failed to cancel attempt", traceId },
       { status: 400 }
     );
   }

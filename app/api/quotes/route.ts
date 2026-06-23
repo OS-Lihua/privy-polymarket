@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     logError(error, { event: "api_quote_failed", traceId });
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to create quote" },
+      { error: "Failed to create quote", traceId },
       { status: 400 }
     );
   }

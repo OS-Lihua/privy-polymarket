@@ -73,7 +73,7 @@ export async function POST(
   } catch (error) {
     logError(error, { event: "api_fee_tx_failed", traceId });
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to verify fee transaction" },
+      { error: "Failed to verify fee transaction", traceId },
       { status: 400 }
     );
   }

@@ -11,6 +11,7 @@ import { PUSD_DECIMALS } from "@/constants/tokens";
 import { SUCCESS_STYLES } from "@/constants/ui";
 import { cn } from "@/utils/classNames";
 import { parseUnits } from "viem";
+import { logger, serializeError } from "@/lib/logger";
 
 type TransferModalProps = {
   isOpen: boolean;
@@ -70,7 +71,10 @@ export default function TransferModal({ isOpen, onClose }: TransferModalProps) {
       setShowSuccess(true);
       setTimeout(() => onClose(), 2000);
     } catch (err) {
-      console.error("Transfer failed:", err);
+      logger.warn({
+        event: "polygon_asset_transfer_failed",
+        error: serializeError(err),
+      });
     }
   };
 

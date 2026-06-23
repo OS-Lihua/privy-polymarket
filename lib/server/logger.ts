@@ -23,7 +23,7 @@ const REDACT_PATHS = [
   "*.key",
 ];
 
-const logFilePath = process.env.LOG_FILE_PATH || "logs/app.log";
+const logFilePath = process.env.SERVER_LOG_FILE_PATH || "logs/server.log";
 
 ensureLogDirectory(logFilePath);
 
@@ -45,6 +45,10 @@ export function getTraceId(headers: Headers) {
 
 export function logError(error: unknown, context: LogContext = {}) {
   logger.error({ ...context, error: serializeError(error) });
+}
+
+export function safeErrorResponse(message: string, traceId?: string) {
+  return traceId ? { error: message, traceId } : { error: message };
 }
 
 function ensureLogDirectory(path: string) {

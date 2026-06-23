@@ -20,8 +20,8 @@ export default function useTickSize(tokenId: string | null) {
       if (parsed && !isNaN(parsed) && parsed > 0) {
         setTickSize(parsed);
       }
-    } catch (error) {
-      console.warn("Failed to fetch tick size, using default:", error);
+    } catch {
+      // Keep the default tick size for transient CLOB lookup failures.
     } finally {
       setIsLoading(false);
     }

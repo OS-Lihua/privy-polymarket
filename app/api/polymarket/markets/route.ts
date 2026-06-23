@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GAMMA_API_URL } from "@/constants/api";
+import { CLOB_API_URL, GAMMA_API_URL } from "@/constants/api";
+import { logger, logError } from "@/lib/server/logger";
 
 const MIN_LIQUIDITY_USD = 1000;
 const MIN_LIQUIDITY_NON_EVERGREEN_USD = 5000;
@@ -26,14 +27,14 @@ export async function GET(request: NextRequest) {
     });
 
     if (!response.ok) {
-      console.error("Gamma API error:", response.status);
+      logger.warn({ event: "api_markets_gamma_error", status: response.status });
       throw new Error(`Gamma API error: ${response.status}`);
     }
 
     const events = await response.json();
 
     if (!Array.isArray(events)) {
-      console.error("Invalid response structure:", events);
+      logger.warn({ event: "api_markets_invalid_response" });
       return NextResponse.json(
         { error: "Invalid API response" },
         { status: 500 }
@@ -108,12 +109,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(pricedMarkets);
   } catch (error) {
-    console.error("Error fetching markets:", error);
+    logError(error, { event: "api_markets_failed" });
     return NextResponse.json(
-      {
-        error:
-          error instanceof Error ? error.message : "Failed to fetch markets",
-      },
+      { error: "Failed to fetch markets" },
       { status: 500 }
     );
   }
@@ -129,7 +127,7 @@ async function addBestAskPrices(markets: any[]) {
         tokenIds.map(async (tokenId: string) => {
           try {
             const response = await fetch(
-              `https://clob.polymarket.com/price?token_id=${tokenId}&side=BUY`,
+              `${CLOB_API_URL}/price?token_id=${tokenId}&side=BUY`,
               { cache: "no-store" }
             );
 

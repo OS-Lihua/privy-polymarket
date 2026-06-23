@@ -34,7 +34,6 @@ export default function useWrapUsdcToPusd() {
         const error =
           err instanceof Error ? err : new Error("Failed to wrap USDC.e");
         setError(error);
-        console.error("Wrap error:", error);
         throw error;
       } finally {
         setIsWrapping(false);

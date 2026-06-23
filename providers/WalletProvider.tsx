@@ -13,6 +13,7 @@ import { polygon } from "viem/chains";
 import { WalletContext } from "@/providers/WalletContext";
 import { polygonTransport } from "@/utils/polygonTransport";
 import { polygonChainWithRpc } from "@/utils/polygonChain";
+import { logger, serializeError } from "@/lib/logger";
 
 const publicClient = createPublicClient({
   chain: polygon,
@@ -54,7 +55,10 @@ function WalletContextProvider({ children }: { children: ReactNode }) {
         const ethersProvider = new providers.Web3Provider(provider);
         setEthersSigner(ethersProvider.getSigner());
       } catch (err) {
-        console.error("Failed to initialize wallet client:", err);
+        logger.warn({
+          event: "wallet_client_init_failed",
+          error: serializeError(err),
+        });
         setWalletClient(null);
         setEthersSigner(null);
       }
@@ -73,7 +77,10 @@ function WalletContextProvider({ children }: { children: ReactNode }) {
           await wallet.switchChain(polygon.id);
         }
       } catch (err) {
-        console.error("Failed to switch chain:", err);
+        logger.warn({
+          event: "wallet_chain_switch_failed",
+          error: serializeError(err),
+        });
       }
     }
     ensurePolygonChain();

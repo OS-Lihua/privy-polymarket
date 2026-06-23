@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const GAMMA_API = "https://gamma-api.polymarket.com";
+import { GAMMA_API_URL } from "@/constants/api";
+import { logger, logError } from "@/lib/server/logger";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const response = await fetch(
-      `${GAMMA_API}/markets?limit=100&offset=0&active=true&closed=false`,
+      `${GAMMA_API_URL}/markets?limit=100&offset=0&active=true&closed=false`,
       {
         headers: { "Content-Type": "application/json" },
         next: { revalidate: 300 },
@@ -23,14 +23,17 @@ export async function GET(request: NextRequest) {
     );
 
     if (!response.ok) {
-      console.error("Gamma API error:", response.status);
+      logger.warn({
+        event: "api_market_by_token_gamma_error",
+        status: response.status,
+      });
       throw new Error(`Gamma API error: ${response.status}`);
     }
 
     const markets = await response.json();
 
     if (!Array.isArray(markets)) {
-      console.error("Invalid response structure:", markets);
+      logger.warn({ event: "api_market_by_token_invalid_response" });
       return NextResponse.json(
         { error: "Invalid API response" },
         { status: 500 }
@@ -53,14 +56,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(market);
   } catch (error) {
-    console.error("Error fetching market by token:", error);
+    logError(error, { event: "api_market_by_token_failed", tokenId });
     return NextResponse.json(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch market by token",
-      },
+      { error: "Failed to fetch market by token" },
       { status: 500 }
     );
   }

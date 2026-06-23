@@ -5,6 +5,7 @@ import QueryProvider from "./QueryProvider";
 import WalletProvider from "./WalletProvider";
 import TradingProvider from "./TradingProvider";
 import ThemeProvider from "./ThemeProvider";
+import ClientLogProvider from "./ClientLogProvider";
 import { I18nProvider } from "@/lib/i18n";
 
 export default function Providers({ children }: { children: ReactNode }) {
@@ -25,9 +26,11 @@ export default function Providers({ children }: { children: ReactNode }) {
     <ThemeProvider>
       <I18nProvider>
         <WalletProvider>
-          <QueryProvider>
-            <TradingProvider>{children}</TradingProvider>
-          </QueryProvider>
+          <ClientLogProvider>
+            <QueryProvider>
+              <TradingProvider>{children}</TradingProvider>
+            </QueryProvider>
+          </ClientLogProvider>
         </WalletProvider>
       </I18nProvider>
     </ThemeProvider>

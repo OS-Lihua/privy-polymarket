@@ -12,6 +12,7 @@ import {
   SessionStep,
 } from "@/utils/session";
 import { APPROVAL_SCHEMA_VERSION } from "@/utils/approvals";
+import { logger, serializeError } from "@/lib/logger";
 
 // This is the coordination hook that manages the user's trading session
 // It orchestrates the steps for initializing both the clob and relay clients
@@ -64,7 +65,10 @@ export default function useTradingSession() {
   useEffect(() => {
     if (tradingSession && !relayClient && eoaAddress && walletClient) {
       initializeRelayClient().catch((err) => {
-        console.error("Failed to restore relay client:", err);
+        logger.warn({
+          event: "relay_client_restore_failed",
+          error: serializeError(err),
+        });
       });
     }
   }, [
@@ -83,6 +87,7 @@ export default function useTradingSession() {
     setSessionError(null);
 
     try {
+      logger.info({ event: "trading_session_init_started" });
       // Step 1: Get User API Credentials (derive or create), then use them to
       // create Builder credentials and store them encrypted on the server.
       let apiCreds = tradingSession?.apiCredentials;
@@ -99,10 +104,12 @@ export default function useTradingSession() {
       if (!(await hasStoredBuilderCredentials())) {
         await createAndStoreBuilderCredentials(apiCreds);
       }
+      logger.info({ event: "trading_session_credentials_ready" });
 
       // Step 2: Initializes relayClient with the ethers signer and
       // per-user Builder credentials (via remote signing server).
       const initializedRelayClient = await initializeRelayClient();
+      logger.info({ event: "trading_session_relay_client_ready" });
 
       // Step 3: Set up Deposit Wallet
       setCurrentStep("depositWallet");
@@ -119,6 +126,10 @@ export default function useTradingSession() {
       if (!depositWalletDeployed) {
         await deployDepositWallet(initializedRelayClient);
       }
+      logger.info({
+        event: "trading_session_deposit_wallet_ready",
+        depositWalletAddress,
+      });
 
       // Step 4: Set all required token approvals for trading
       setCurrentStep("approvals");
@@ -152,9 +163,17 @@ export default function useTradingSession() {
       saveSession(eoaAddress, newSession);
 
       setCurrentStep("complete");
+      logger.info({
+        event: "trading_session_init_succeeded",
+        depositWalletAddress,
+        hasApprovals,
+      });
     } catch (err) {
-      console.error("Session initialization error:", err);
       const error = err instanceof Error ? err : new Error("Unknown error");
+      logger.error({
+        event: "trading_session_init_failed",
+        error: serializeError(error),
+      });
       setSessionError(error);
       setCurrentStep("idle");
     }

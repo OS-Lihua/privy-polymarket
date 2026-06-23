@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { buildHmacSignature } from "@polymarket/builder-signing-sdk";
 import { requirePrivyAuth } from "@/lib/server/auth";
 import { getUserBuilderCredentials } from "@/lib/server/builder-credentials";
+import { logError } from "@/lib/server/logger";
 
 // This route is used to sign messages for builder authentication (RelayClient) or order attribution (ClobClient)
 
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
       POLY_BUILDER_PASSPHRASE: builderCredentials.passphrase,
     });
   } catch (error) {
-    console.error("Signing error:", error);
+    logError(error, { event: "api_builder_sign_failed" });
     return NextResponse.json(
       { error: "Failed to sign message" },
       { status: 500 }
