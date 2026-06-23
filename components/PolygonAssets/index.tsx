@@ -12,6 +12,7 @@ import Card from "@/components/shared/Card";
 import Badge from "@/components/shared/Badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import BridgeDepositModal from "@/components/PolygonAssets/BridgeDepositModal";
 import TransferModal from "@/components/PolygonAssets/TransferModal";
 import { formatAddress } from "@/utils/formatting";
 import { useI18n } from "@/lib/i18n";
@@ -19,6 +20,7 @@ import { USDC_E_DECIMALS } from "@/constants/tokens";
 
 export default function PolygonAssets() {
 	const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+	const [isBridgeModalOpen, setIsBridgeModalOpen] = useState(false);
 	const [wrapError, setWrapError] = useState<string | null>(null);
 	const { t } = useI18n();
 	const queryClient = useQueryClient();
@@ -106,12 +108,17 @@ export default function PolygonAssets() {
 						Deposit wallet liquidity for CLOB orders.
 					</p>
 				</div>
-				<Button
-					onClick={() => setIsTransferModalOpen(true)}
-					variant="secondary"
-				>
-					{t("send")}
-				</Button>
+				<div className="flex gap-2">
+					<Button onClick={() => setIsBridgeModalOpen(true)} variant="default">
+						Deposit
+					</Button>
+					<Button
+						onClick={() => setIsTransferModalOpen(true)}
+						variant="secondary"
+					>
+						{t("send")}
+					</Button>
+				</div>
 			</div>
 
 			<div
@@ -164,6 +171,11 @@ export default function PolygonAssets() {
 			<TransferModal
 				isOpen={isTransferModalOpen}
 				onClose={() => setIsTransferModalOpen(false)}
+			/>
+			<BridgeDepositModal
+				isOpen={isBridgeModalOpen}
+				onClose={() => setIsBridgeModalOpen(false)}
+				depositWalletAddress={depositWalletAddress}
 			/>
 		</Card>
 	);

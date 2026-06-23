@@ -1,0 +1,43 @@
+import { NextResponse } from "next/server";
+import { POLYMARKET_BRIDGE_API_URL } from "@/constants/api";
+import { logger, logError } from "@/lib/server/logger";
+
+export async function GET() {
+	try {
+		const response = await fetch(
+			`${POLYMARKET_BRIDGE_API_URL.replace(/\/$/, "")}/supported-assets`,
+			{
+				method: "GET",
+				headers: {
+					Accept: "application/json",
+					"User-Agent": "privy-polymarket-demo/1.0",
+				},
+				cache: "no-store",
+			},
+		);
+
+		if (!response.ok) {
+			logger.warn({
+				event: "api_bridge_supported_assets_upstream_error",
+				status: response.status,
+			});
+			return NextResponse.json(
+				{ error: "Failed to fetch bridge supported assets" },
+				{ status: 502 },
+			);
+		}
+
+		const data = await response.json();
+		return NextResponse.json(data, {
+			headers: {
+				"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+			},
+		});
+	} catch (error) {
+		logError(error, { event: "api_bridge_supported_assets_failed" });
+		return NextResponse.json(
+			{ error: "Failed to fetch bridge supported assets" },
+			{ status: 502 },
+		);
+	}
+}

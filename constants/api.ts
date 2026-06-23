@@ -11,6 +11,8 @@ export const GAMMA_API_URL =
 export const POLYMARKET_DATA_API_URL =
   process.env.NEXT_PUBLIC_POLYMARKET_DATA_API_URL ||
   "https://data-api.polymarket.com";
+export const POLYMARKET_BRIDGE_API_URL =
+  process.env.POLYMARKET_BRIDGE_API_URL || "https://bridge.polymarket.com";
 export const POLYMARKET_WEB_URL =
   process.env.NEXT_PUBLIC_POLYMARKET_WEB_URL || "https://polymarket.com";
 export const POLYMARKET_PROFILE_URL = (address: string) =>
