@@ -534,7 +534,7 @@ function QuoteSummary({
 				value={shortAddress(quote.feeWallet)}
 			/>
 			<SummaryRow
-				label={t("tradingSafe")}
+				label={t("tradingWallet")}
 				value={shortAddress(quote.depositWalletAddress)}
 			/>
 		</div>

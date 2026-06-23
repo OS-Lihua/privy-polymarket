@@ -18,27 +18,42 @@ const dictionaries = {
     appTitle: "Polymarket Fee Trader",
     login: "Log in",
     logout: "Disconnect",
+    account: "Account",
+    backToWorkbench: "Back to workbench",
     language: "Language",
     english: "EN",
     chinese: "中文",
     eoaWallet: "EOA wallet",
-    safeWallet: "Safe Address",
     depositWallet: "Deposit Wallet",
     depositWalletPending: "Initialize first",
     copied: "Copied",
     profile: "Polymarket profile",
     profileUnavailable:
       "This Privy EOA does not have a corresponding Polymarket.com profile.",
+    accountTitle: "Account and wallet controls",
+    accountSubtitle:
+      "Review wallet addresses, open the linked Polymarket page, export your embedded wallet, or disconnect from this device.",
+    accountNotConnectedTitle: "Log in to manage your account",
+    accountNotConnectedBody:
+      "Connect your Privy wallet before opening account controls.",
+    walletOverview: "Wallet overview",
+    polymarketProfileBody:
+      "Open the Polymarket page for your Deposit Wallet when it is ready. Before initialization, the signing wallet address is used.",
+    openPolymarketProfile: "Open Polymarket",
+    privateKeyExportTitle: "Export private key",
+    privateKeyExportBody:
+      "Privy opens a secure modal for your embedded wallet export. This app never receives, stores, or logs your private key.",
+    privateKeyExportWarning:
+      "Anyone with this private key can control the wallet. Do not share it, paste it into untrusted sites, or save it in plain text.",
+    exportPrivateKey: "Export private key",
     eoaHelp:
       "This wallet signs actions for your Deposit Wallet. Do not fund this address.",
-    safeHelp:
-      "Deterministic Safe address shown for comparison only. Trading uses the Deposit Wallet.",
     depositWalletHelp:
       "This wallet is generated during initialization and holds CLOB V2 trading funds. Fund this address with Polygon pUSD.",
     tradingBalance: "Trading Balance",
     loadingBalance: "Loading balance",
     errorLoadingBalance: "Error loading balance",
-    safeRechargeAddress: "Deposit Wallet funding address",
+    depositRechargeAddress: "Deposit Wallet funding address",
     depositWalletAddress: "Deposit Wallet address",
     send: "Send",
     polygonUsdcWarning:
@@ -110,20 +125,20 @@ const dictionaries = {
     bestAsk: "Best ask",
     maxPrice: "Max price",
     feeRecipient: "Fee recipient",
-    tradingSafe: "Deposit Wallet",
+    tradingWallet: "Deposit Wallet",
     geoblockedTitle: "Trading unavailable in your region",
     geoblockedBody:
       "You can view markets, but cannot place trades or initialize a trading session.",
     detectedRegion: "Detected region",
     tourWalletsTitle: "1. Review the wallets",
     tourWalletsBody:
-      "The top-right wallet panel shows the signing wallet, the demo Safe address, and the Deposit Wallet slot. The Deposit Wallet is created during initialization.",
+      "The top-right wallet panel shows the signing wallet and the Deposit Wallet slot. The Deposit Wallet is created during initialization.",
     tourSessionTitle: "2. Initialize trading",
     tourSessionBody:
       "Initialize before funding or trading. This creates the Deposit Wallet, stores Polymarket API credentials, and approves tokens.",
     tourDepositWalletTitle: "1. Fund the Deposit Wallet",
     tourDepositWalletBody:
-      "The top-right Deposit Wallet is the address users send Polygon pUSD to. Do not fund the signing wallet or the demo Safe address.",
+      "The top-right Deposit Wallet is the address users send Polygon pUSD to. Do not fund the signing wallet.",
     tourDepositTitle: "2. Check balance and token",
     tourDepositBody:
       "This panel shows the pUSD balance. Fund the Deposit Wallet with Polygon pUSD, or wrap USDC.e into pUSD before placing orders.",
@@ -140,24 +155,39 @@ const dictionaries = {
     appTitle: "Polymarket 手续费交易",
     login: "登录",
     logout: "断开",
+    account: "账户",
+    backToWorkbench: "返回工作台",
     language: "语言",
     english: "EN",
     chinese: "中文",
     eoaWallet: "签名钱包",
-    safeWallet: "Safe 地址",
     depositWallet: "交易钱包",
     depositWalletPending: "先初始化",
     copied: "已复制",
     profile: "Polymarket 主页",
     profileUnavailable: "这个 Privy 钱包没有对应的 Polymarket.com 主页。",
+    accountTitle: "账户和钱包控制",
+    accountSubtitle:
+      "查看钱包地址，打开关联的 Polymarket 页面，导出内置钱包，或断开当前设备连接。",
+    accountNotConnectedTitle: "登录后管理账户",
+    accountNotConnectedBody: "请先连接 Privy 钱包，再打开账户控制。",
+    walletOverview: "钱包概览",
+    polymarketProfileBody:
+      "交易钱包准备好后，会打开交易钱包对应的 Polymarket 页面。未初始化前使用签名钱包地址。",
+    openPolymarketProfile: "打开 Polymarket",
+    privateKeyExportTitle: "导出私钥",
+    privateKeyExportBody:
+      "Privy 会打开安全弹窗完成内置钱包导出。本应用不会接收、保存或记录你的私钥。",
+    privateKeyExportWarning:
+      "任何拿到私钥的人都可以控制这个钱包。不要分享私钥，不要粘贴到不可信网站，也不要明文保存。",
+    exportPrivateKey: "导出私钥",
     eoaHelp: "这个钱包只用来签名，不要往这里充值。",
-    safeHelp: "这是用于对比展示的确定性 Safe 地址。真实交易使用交易钱包。",
     depositWalletHelp:
       "这个钱包会在初始化时生成，用来存放 CLOB V2 交易资金。充值 Polygon pUSD 到这里。",
     tradingBalance: "交易余额",
     loadingBalance: "正在读取余额",
     errorLoadingBalance: "余额读取失败",
-    safeRechargeAddress: "交易钱包充值地址",
+    depositRechargeAddress: "交易钱包充值地址",
     depositWalletAddress: "交易钱包地址",
     send: "发送",
     polygonUsdcWarning:
@@ -227,19 +257,19 @@ const dictionaries = {
     bestAsk: "卖一价",
     maxPrice: "最高成交价",
     feeRecipient: "手续费收款方",
-    tradingSafe: "交易钱包",
+    tradingWallet: "交易钱包",
     geoblockedTitle: "你所在地区暂不可交易",
     geoblockedBody: "你可以查看市场，但不能下单或初始化交易会话。",
     detectedRegion: "检测地区",
     tourWalletsTitle: "1. 先看右上角的钱包",
     tourWalletsBody:
-      "右上角会显示签名钱包、用于对比展示的 Safe 地址，以及交易钱包位置。交易钱包要初始化后才会生成。",
+      "右上角会显示签名钱包和交易钱包位置。交易钱包要初始化后才会生成。",
     tourSessionTitle: "2. 初始化交易",
     tourSessionBody:
       "先初始化，再充值和下单。初始化会生成交易钱包、保存 Polymarket API 凭证，并完成代币授权。",
     tourDepositWalletTitle: "1. 给交易钱包充值",
     tourDepositWalletBody:
-      "右上角的交易钱包才是用户转账充值的地址。不要充值到签名钱包，也不要充值到展示用的 Safe 地址。",
+      "右上角的交易钱包才是用户转账充值的地址。不要充值到签名钱包。",
     tourDepositTitle: "2. 查看余额和充值币种",
     tourDepositBody:
       "这里显示 pUSD 余额。下单前需要向交易钱包充值 Polygon pUSD，或把 USDC.e 包装成 pUSD。",

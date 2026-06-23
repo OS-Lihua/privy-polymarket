@@ -52,9 +52,9 @@ export default function useRelayClient() {
 			},
 		});
 
-		// The relayClient instance is used for deploying the Safe,
-		// setting token approvals, and executing CTF operations such
-		// as splitting, merging, and redeeming positions.
+		// The relayClient instance is used for deploying the Deposit Wallet,
+		// setting token approvals, and executing CTF operations such as
+		// splitting, merging, and redeeming positions.
 
 		// builder-relayer-client still depends on builder-signing-sdk 0.0.x while
 		// clob-client 5.x uses 1.x. The runtime shape is compatible, but their

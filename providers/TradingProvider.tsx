@@ -6,7 +6,6 @@ import type { RelayClient } from "@polymarket/builder-relayer-client";
 import { useWallet } from "@/providers/WalletContext";
 import useClobClient from "@/hooks/useClobClient";
 import useTradingSession from "@/hooks/useTradingSession";
-import useSafeDeployment from "@/hooks/useSafeDeployment";
 import useGeoblock, { GeoblockStatus } from "@/hooks/useGeoblock";
 import { TradingSession, SessionStep } from "@/utils/session";
 
@@ -20,7 +19,6 @@ interface TradingContextType {
 	clobClient: ClobClient | null;
 	relayClient: RelayClient | null;
 	eoaAddress: string | undefined;
-	safeAddress: string | undefined;
 	depositWalletAddress: string | undefined;
 	isGeoblocked: boolean;
 	isGeoblockLoading: boolean;
@@ -37,7 +35,6 @@ export function useTrading() {
 
 export default function TradingProvider({ children }: { children: ReactNode }) {
 	const { eoaAddress } = useWallet();
-	const { derivedSafeAddressFromEoa } = useSafeDeployment(eoaAddress);
 
 	const {
 		isBlocked: isGeoblocked,
@@ -79,7 +76,6 @@ export default function TradingProvider({ children }: { children: ReactNode }) {
 				clobClient,
 				relayClient,
 				eoaAddress,
-				safeAddress: derivedSafeAddressFromEoa,
 				depositWalletAddress: tradingSession?.depositWalletAddress,
 				isGeoblocked,
 				isGeoblockLoading,

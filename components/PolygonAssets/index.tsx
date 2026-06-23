@@ -82,9 +82,9 @@ export default function PolygonAssets() {
 				</p>
 				<p
 					className="text-center text-xs text-muted-foreground mb-3"
-					data-tour="safe-address"
+					data-tour="deposit-wallet-address"
 				>
-					{t("safeRechargeAddress")}: {formatAddress(depositWalletAddress)}
+					{t("depositRechargeAddress")}: {formatAddress(depositWalletAddress)}
 				</p>
 				{error && (
 					<p className="text-center text-xs text-destructive break-words">
@@ -155,7 +155,7 @@ export default function PolygonAssets() {
 
 				<p
 					className="text-xs text-muted-foreground mt-3"
-					data-tour="safe-address"
+				data-tour="deposit-wallet-address"
 				>
 					{t("depositWalletAddress")}: {formatAddress(depositWalletAddress)}
 				</p>

@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 			await verifyDepositWalletOwnership({
 				eoaAddress: readString(body.eoaAddress, "eoaAddress"),
 				depositWalletAddress: readString(
-					body.depositWalletAddress ?? body.safeAddress,
+					body.depositWalletAddress,
 					"depositWalletAddress",
 				),
 			});

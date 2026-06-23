@@ -25,7 +25,7 @@ export default function Home() {
 	return (
 		<div className="min-h-screen px-4 py-4 sm:px-6 lg:px-8">
 			<div className="mx-auto flex max-w-7xl flex-col gap-5">
-				<Header onEndSession={endTradingSession} />
+				<Header />
 
 				{/* Show geoblock banner if user is in blocked region */}
 				{isGeoblocked && !isGeoblockLoading && (

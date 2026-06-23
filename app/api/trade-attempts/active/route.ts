@@ -10,9 +10,9 @@ export async function GET(request: NextRequest) {
 
 	try {
 		const auth = await requirePrivyAuth(request);
-		const depositWalletAddress =
-			request.nextUrl.searchParams.get("depositWalletAddress") ||
-			request.nextUrl.searchParams.get("safeAddress");
+		const depositWalletAddress = request.nextUrl.searchParams.get(
+			"depositWalletAddress",
+		);
 
 		const attempt = await prisma.tradeAttempt.findFirst({
 			where: {

@@ -1,29 +1,22 @@
 "use client";
 
 import { usePrivy } from "@privy-io/react-auth";
+import { UserRound } from "lucide-react";
+import Link from "next/link";
 import { useWallet } from "@/providers/WalletContext";
 import WalletInfo from "@/components/Header/WalletInfo";
 import ThemeToggle from "@/components/Header/ThemeToggle";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/utils/classNames";
 
-export default function Header({
-	onEndSession,
-}: {
-	onEndSession?: () => void;
-}) {
+export default function Header() {
 	const { eoaAddress } = useWallet();
-	const { login, logout } = usePrivy();
+	const { login } = usePrivy();
 	const { language, setLanguage, t } = useI18n();
 
 	const handleConnect = async () => {
 		login();
-	};
-
-	const handleDisconnect = async () => {
-		onEndSession?.();
-		logout();
 	};
 
 	return (
@@ -72,7 +65,16 @@ export default function Header({
 				</div>
 				<ThemeToggle />
 				{eoaAddress ? (
-					<WalletInfo onDisconnect={handleDisconnect} />
+					<div className="flex flex-col gap-3">
+						<WalletInfo />
+						<Link
+							href="/account"
+							className={cn(buttonVariants({ variant: "outline" }), "w-full")}
+						>
+							<UserRound className="h-4 w-4" />
+							{t("account")}
+						</Link>
+					</div>
 				) : (
 					<Button onClick={handleConnect}>{t("login")}</Button>
 				)}

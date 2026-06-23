@@ -33,9 +33,7 @@ export async function POST(request: NextRequest) {
 		const { eoaAddress, depositWalletAddress } =
 			await verifyDepositWalletOwnership({
 				eoaAddress: String(quote.eoaAddress || ""),
-				depositWalletAddress: String(
-					quote.depositWalletAddress || quote.safeAddress || "",
-				),
+				depositWalletAddress: String(quote.depositWalletAddress || ""),
 			});
 
 		logger.info({
@@ -76,14 +74,14 @@ export async function POST(request: NextRequest) {
 
 		const feeConfig = getFeeConfig();
 		const totalAmountUsdcMicros = BigInt(String(quote.totalAmountUsdcMicros));
-		const safeBalance = await getUsdcBalance(depositWalletAddress);
+		const depositWalletBalance = await getUsdcBalance(depositWalletAddress);
 
-		if (safeBalance < totalAmountUsdcMicros) {
+		if (depositWalletBalance < totalAmountUsdcMicros) {
 			logger.warn({
 				event: "api_attempt_insufficient_balance",
 				traceId,
 				depositWalletAddress,
-				safeBalance: safeBalance.toString(),
+				depositWalletBalance: depositWalletBalance.toString(),
 				totalAmountUsdcMicros: totalAmountUsdcMicros.toString(),
 			});
 			return NextResponse.json(
