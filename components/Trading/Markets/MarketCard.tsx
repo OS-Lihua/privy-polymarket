@@ -42,7 +42,7 @@ export default function MarketCard({
 
   return (
     <Card hover className="p-4">
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-4">
         {/* Market Icon */}
         {market.icon && (
           <Image
@@ -51,21 +51,21 @@ export default function MarketCard({
             width={48}
             height={48}
             unoptimized
-            className="w-12 h-12 rounded flex-shrink-0 object-cover"
+            className="w-12 h-12 rounded-md flex-shrink-0 object-cover ring-1 ring-border"
           />
         )}
 
         <div className="flex-1 min-w-0">
           {/* Market Title and Closed Badge */}
           <div className="flex items-start justify-between gap-2 mb-2">
-            <h4 className="font-semibold text-base line-clamp-2 flex-1">
+            <h4 className="font-semibold text-base leading-6 line-clamp-2 flex-1">
               {market.question}
             </h4>
             {isClosed && <Badge variant="closed">Closed</Badge>}
           </div>
 
           {/* Market Stats */}
-          <div className="grid grid-cols-3 gap-3 text-sm mb-3">
+          <div className="grid grid-cols-3 gap-3 rounded-lg border border-border bg-panel p-3 text-sm mb-3">
             <StatDisplay
               label={t("volume24h")}
               value={formatVolume(volumeUSD)}

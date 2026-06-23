@@ -56,14 +56,14 @@ export default function OutcomeButtons({
             }}
             disabled={isDisabled || !tokenId || !hasPrice}
             className={cn(
-              "flex-1 min-w-[120px] px-3 py-2 rounded border transition-all duration-200",
+              "flex-1 min-w-[120px] rounded-md border px-3 py-2 transition-colors duration-200",
               isDisabled || !tokenId || !hasPrice
-                ? "bg-white/5 border-white/10 cursor-not-allowed opacity-50"
-                : "bg-white/5 border-white/10 hover:bg-blue-500/20 hover:border-blue-500/40 cursor-pointer"
+                ? "bg-muted border-border cursor-not-allowed opacity-60"
+                : "bg-background border-border hover:bg-primary/10 hover:border-primary/35 cursor-pointer"
             )}
           >
-            <p className="text-xs text-white/60 mb-1 truncate">{outcome}</p>
-            <p className="text-blue-400 font-bold text-lg">
+            <p className="text-xs text-muted-foreground mb-1 truncate">{outcome}</p>
+            <p className="text-primary font-semibold text-lg">
               {hasPrice ? `${priceInCents}¢` : "--"}
             </p>
           </button>

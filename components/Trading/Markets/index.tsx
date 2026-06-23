@@ -65,16 +65,18 @@ export default function HighVolumeMarkets() {
         />
 
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <h3 className="text-xl font-bold">
-            {t("categoryMarkets", { category: categoryLabel })}{" "}
-            {markets ? `(${markets.length})` : ""}
-          </h3>
-          <p className="text-xs text-gray-400">{t("sortedMarkets")}</p>
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h3 className="text-base font-semibold tracking-tight">
+              {t("categoryMarkets", { category: categoryLabel })}{" "}
+              {markets ? `(${markets.length})` : ""}
+            </h3>
+            <p className="text-sm text-muted-foreground">{t("sortedMarkets")}</p>
+          </div>
         </div>
 
         {!isTradingSessionComplete && !isGeoblocked && (
-          <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3 text-sm text-yellow-200">
+          <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm text-warning">
             {t("initializeBeforeOrder")}
           </div>
         )}
@@ -97,7 +99,7 @@ export default function HighVolumeMarkets() {
 
         {/* Market Cards */}
         {!isLoading && !error && markets && markets.length > 0 && (
-          <div className="space-y-3">
+          <div className="grid gap-3">
             {markets.map((market) => (
               <MarketCard
                 key={market.id}

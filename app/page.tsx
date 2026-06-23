@@ -23,7 +23,8 @@ export default function Home() {
   } = useTrading();
 
   return (
-    <div className="p-6 min-h-screen flex flex-col gap-6 max-w-7xl mx-auto">
+    <div className="min-h-screen px-4 py-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl flex-col gap-5">
       <Header onEndSession={endTradingSession} />
 
       {/* Show geoblock banner if user is in blocked region */}
@@ -48,6 +49,7 @@ export default function Home() {
       {eoaAddress && <MarketTabs />}
 
       <OnboardingGuide enabled={Boolean(eoaAddress)} />
+      </div>
     </div>
   );
 }

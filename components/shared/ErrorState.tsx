@@ -14,7 +14,7 @@ export default function ErrorState({
 
   return (
     <div className={ERROR_STYLES}>
-      <p className="text-center text-red-300">
+      <p className="text-center text-destructive">
         {title}: {errorMessage}
       </p>
     </div>

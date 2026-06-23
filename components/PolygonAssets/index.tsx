@@ -10,6 +10,8 @@ import useWrapUsdcToPusd from "@/hooks/useWrapUsdcToPusd";
 
 import Card from "@/components/shared/Card";
 import Badge from "@/components/shared/Badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import TransferModal from "@/components/PolygonAssets/TransferModal";
 import { formatAddress } from "@/utils/formatting";
 import { useI18n } from "@/lib/i18n";
@@ -58,27 +60,25 @@ export default function PolygonAssets() {
 
   if (isLoading) {
     return (
-      <Card className="p-6">
+      <Card className="p-5">
         <h2 className="text-xl font-semibold mb-4">{t("tradingBalance")}</h2>
-        <p className="text-center text-white/70" data-tour="deposit-balance">
-          {t("loadingBalance")}
-        </p>
+        <Skeleton className="h-28 w-full" data-tour="deposit-balance" />
       </Card>
     );
   }
 
   if (isError) {
     return (
-      <Card className="p-6">
+      <Card className="p-5">
         <h2 className="text-xl font-semibold mb-4">{t("tradingBalance")}</h2>
-        <p className="text-center text-red-400 mb-3" data-tour="deposit-balance">
+        <p className="text-center text-destructive mb-3" data-tour="deposit-balance">
           {t("errorLoadingBalance")}
         </p>
-        <p className="text-center text-xs text-white/50 mb-3" data-tour="safe-address">
+        <p className="text-center text-xs text-muted-foreground mb-3" data-tour="safe-address">
           {t("safeRechargeAddress")}: {formatAddress(depositWalletAddress)}
         </p>
         {error && (
-          <p className="text-center text-xs text-red-300 break-words">
+          <p className="text-center text-xs text-destructive break-words">
             {error instanceof Error ? error.message : String(error)}
           </p>
         )}
@@ -87,49 +87,53 @@ export default function PolygonAssets() {
   }
 
   return (
-    <Card className="p-6">
+    <Card className="p-5">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">{t("tradingBalance")}</h2>
-        <button
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">{t("tradingBalance")}</h2>
+          <p className="text-sm text-muted-foreground">Deposit wallet liquidity for CLOB orders.</p>
+        </div>
+        <Button
           onClick={() => setIsTransferModalOpen(true)}
-          className="btn btn-secondary"
+          variant="secondary"
         >
           {t("send")}
-        </button>
+        </Button>
       </div>
 
-      <div className="bg-white/5 rounded-lg p-6 text-center" data-tour="deposit-balance">
+      <div className="rounded-lg border border-border bg-panel p-5 text-center" data-tour="deposit-balance">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <h3 className="text-lg font-semibold text-white/70">pUSD</h3>
+          <h3 className="text-lg font-semibold text-muted-foreground">pUSD</h3>
           <Badge className="text-xs px-2 py-1">Polygon</Badge>
         </div>
 
-        <p className="text-5xl font-bold">${formattedPusdBalance}</p>
-        <div className="mt-4 rounded-lg border border-white/10 bg-black/20 p-3">
+        <p className="text-4xl font-semibold tracking-tight sm:text-5xl">${formattedPusdBalance}</p>
+        <div className="mt-4 rounded-lg border border-border bg-card p-3">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-left">
-              <p className="text-xs text-white/50">{t("availableUsdcE")}</p>
-              <p className="text-sm font-semibold text-white">
+              <p className="text-xs text-muted-foreground">{t("availableUsdcE")}</p>
+              <p className="text-sm font-semibold text-foreground">
                 {formattedUsdcBalance} USDC.e
               </p>
             </div>
-            <button
+            <Button
               type="button"
               onClick={handleWrapAll}
               disabled={isWrapping || usdcBalance <= 0}
-              className="btn btn-secondary disabled:cursor-not-allowed disabled:opacity-50"
+              variant="secondary"
+              loading={isWrapping}
             >
               {isWrapping ? t("wrapping") : t("wrapToPusd")}
-            </button>
+            </Button>
           </div>
           {(wrapError || wrapHookError) && (
-            <p className="mt-2 text-left text-xs text-red-300">
+            <p className="mt-2 text-left text-xs text-destructive">
               {wrapError || wrapHookError?.message}
             </p>
           )}
         </div>
 
-        <p className="text-xs text-white/50 mt-3" data-tour="safe-address">
+        <p className="text-xs text-muted-foreground mt-3" data-tour="safe-address">
           {t("depositWalletAddress")}: {formatAddress(depositWalletAddress)}
         </p>
       </div>

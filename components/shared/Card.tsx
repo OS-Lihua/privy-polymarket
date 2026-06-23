@@ -17,7 +17,7 @@ export default function Card({
       {...props}
       className={cn(
         CARD_STYLES,
-        hover && "hover:bg-white/10 transition-colors",
+        hover && "hover:border-primary/35 hover:bg-accent/40 transition-colors",
         className
       )}
     >

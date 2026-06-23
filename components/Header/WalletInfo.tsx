@@ -4,6 +4,7 @@ import { useTrading } from "@/providers/TradingProvider";
 import useSafeDeployment from "@/hooks/useSafeDeployment";
 
 import InfoTooltip from "@/components/shared/InfoTooltip";
+import { Button } from "@/components/ui/button";
 
 import { formatAddress } from "@/utils/formatting";
 import { useI18n } from "@/lib/i18n";
@@ -26,17 +27,17 @@ export default function WalletInfo({
   } = useAddressCopy(depositWalletAddress || null);
 
   return (
-    <div className="bg-white/5 rounded-lg p-3 border border-white/10 min-w-72">
+    <div className="min-w-72 rounded-lg border border-border bg-panel p-3">
       <div className="flex flex-col gap-3">
         {/* EOA Wallet */}
         <div className="flex flex-col sm:flex-row items-center gap-3 justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-white/60 font-medium">
+            <span className="text-sm text-muted-foreground font-medium">
               {t("eoaWallet")}
             </span>
             <InfoTooltip text={t("eoaHelp")} />
           </div>
-          <div className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 transition-all select-none font-mono text-sm w-full sm:w-auto text-center">
+          <div className="rounded-md border border-border bg-background px-4 py-2 font-mono text-sm transition-all select-none w-full sm:w-auto text-center">
             {eoaAddress && formatAddress(eoaAddress)}
           </div>
         </div>
@@ -45,14 +46,14 @@ export default function WalletInfo({
         {derivedSafeAddressFromEoa && (
           <div className="flex flex-col sm:flex-row items-center gap-3 justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-blue-300 font-medium">
+              <span className="text-sm text-primary font-medium">
                 {t("safeWallet")}
               </span>
               <InfoTooltip text={t("safeHelp")} />
             </div>
             <button
               onClick={copySafeAddress}
-              className="bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 hover:border-blue-500/50 rounded-lg px-4 py-2 transition-all select-none cursor-pointer font-mono text-sm text-blue-300 hover:text-blue-200 w-full sm:w-auto text-center"
+              className="w-full rounded-md border border-primary/25 bg-primary/10 px-4 py-2 text-center font-mono text-sm text-primary transition-colors select-none hover:bg-primary/15 sm:w-auto"
             >
               {copiedSafe
                 ? t("copied")
@@ -64,14 +65,14 @@ export default function WalletInfo({
         {depositWalletAddress && (
           <div className="flex flex-col sm:flex-row items-center gap-3 justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-emerald-300 font-medium">
+              <span className="text-sm text-success font-medium">
                 {t("depositWallet")}
               </span>
               <InfoTooltip text={t("depositWalletHelp")} />
             </div>
             <button
               onClick={copyDepositWalletAddress}
-              className="bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/50 rounded-lg px-4 py-2 transition-all select-none cursor-pointer font-mono text-sm text-emerald-300 hover:text-emerald-200 w-full sm:w-auto text-center"
+              className="w-full rounded-md border border-success/25 bg-success/10 px-4 py-2 text-center font-mono text-sm text-success transition-colors select-none hover:bg-success/15 sm:w-auto"
             >
               {copiedDepositWallet
                 ? t("copied")
@@ -81,24 +82,25 @@ export default function WalletInfo({
         )}
 
         {/* Action buttons */}
-        <div className="flex flex-col sm:flex-row items-center gap-3 justify-between pt-2 border-t border-white/10">
+        <div className="flex flex-col sm:flex-row items-center gap-3 justify-between pt-2 border-t border-border">
           <div className="relative group w-full sm:w-auto">
             <button
               disabled
-              className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 transition-all select-none cursor-not-allowed font-medium w-full sm:w-auto text-center text-white/40"
+              className="w-full rounded-md border border-border bg-muted px-4 py-2 text-center font-medium text-muted-foreground opacity-60 cursor-not-allowed sm:w-auto"
             >
               <span className="line-through">{t("profile")}</span>
             </button>
-            <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-64 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-lg border border-white/20 z-10 text-center">
+            <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-64 rounded-md border border-border bg-popover px-3 py-2 text-center text-xs text-popover-foreground shadow-md z-10">
               {t("profileUnavailable")}
             </div>
           </div>
-          <button
+          <Button
             onClick={onDisconnect}
-            className="btn btn-danger w-full sm:w-auto"
+            variant="destructive"
+            className="w-full sm:w-auto"
           >
             {t("logout")}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

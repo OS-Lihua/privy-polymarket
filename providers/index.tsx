@@ -4,6 +4,7 @@ import { ReactNode } from "react";
 import QueryProvider from "./QueryProvider";
 import WalletProvider from "./WalletProvider";
 import TradingProvider from "./TradingProvider";
+import ThemeProvider from "./ThemeProvider";
 import { I18nProvider } from "@/lib/i18n";
 
 export default function Providers({ children }: { children: ReactNode }) {
@@ -21,12 +22,14 @@ export default function Providers({ children }: { children: ReactNode }) {
   }
 
   return (
-    <I18nProvider>
-      <WalletProvider>
-        <QueryProvider>
-          <TradingProvider>{children}</TradingProvider>
-        </QueryProvider>
-      </WalletProvider>
-    </I18nProvider>
+    <ThemeProvider>
+      <I18nProvider>
+        <WalletProvider>
+          <QueryProvider>
+            <TradingProvider>{children}</TradingProvider>
+          </QueryProvider>
+        </WalletProvider>
+      </I18nProvider>
+    </ThemeProvider>
   );
 }

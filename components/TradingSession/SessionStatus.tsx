@@ -18,10 +18,10 @@ export default function SessionStatus({
         <div
           className={cn(
             "w-2 h-2 rounded-full",
-            isComplete ? "bg-green-500" : "bg-gray-500"
+            isComplete ? "bg-success" : "bg-muted-foreground"
           )}
         />
-        <span className="text-sm text-gray-300">
+        <span className="text-sm text-muted-foreground">
           {isComplete ? t("readyToTrade") : t("notInitialized")}
         </span>
       </div>

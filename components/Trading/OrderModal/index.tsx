@@ -373,24 +373,24 @@ export default function OrderPlacementModal({
   return (
     <Portal>
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        className="fixed inset-0 bg-black/55 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         onClick={handleBackdropClick}
       >
         <div
           ref={modalRef}
-          className="bg-gray-900 rounded-lg p-6 max-w-md w-full border border-white/10 shadow-2xl animate-modal-fade-in"
+          className="bg-card text-card-foreground rounded-lg p-6 max-w-md w-full border border-border shadow-lg animate-modal-fade-in"
         >
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
-              <h3 className="text-lg font-bold mb-1">{marketTitle}</h3>
-                <p className="text-sm text-blue-400">
+              <h3 className="text-lg font-semibold mb-1">{marketTitle}</h3>
+                <p className="text-sm text-primary">
                   {t("buying")}: {outcome}
                 </p>
             </div>
             <button
               onClick={onClose}
               disabled={step !== "quote"}
-              className="text-gray-400 hover:text-white disabled:opacity-40 transition-colors"
+              className="text-muted-foreground hover:text-foreground disabled:opacity-40 transition-colors"
             >
               x
             </button>
@@ -398,27 +398,27 @@ export default function OrderPlacementModal({
 
           {step === "done" && (
             <div className={cn("mb-4", SUCCESS_STYLES)}>
-              <p className="text-green-300 font-medium text-sm">
+              <p className="text-success font-medium text-sm">
                 {t("orderSubmitted")}
               </p>
             </div>
           )}
 
           {displayError && (
-            <div className="mb-4 bg-red-500/20 border border-red-500/40 rounded-lg p-3">
-              <p className="text-red-300 text-sm">{displayError}</p>
+            <div className="mb-4 bg-destructive/10 border border-destructive/25 rounded-lg p-3">
+              <p className="text-destructive text-sm">{displayError}</p>
             </div>
           )}
 
-          <div className="mb-4 bg-white/5 rounded-lg p-3">
-            <p className="text-xs text-gray-400 mb-1">
+          <div className="mb-4 bg-panel border border-border rounded-lg p-3">
+            <p className="text-xs text-muted-foreground mb-1">
               {t("currentMarketPrice")}
             </p>
             <p className="text-lg font-bold">{Math.round(currentPrice * 100)}¢</p>
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm text-gray-400 mb-2">
+            <label className="block text-sm text-muted-foreground mb-2">
               {t("totalPayment")}
             </label>
             <input
@@ -434,7 +434,7 @@ export default function OrderPlacementModal({
               }}
               placeholder="100.00"
               disabled={step !== "quote"}
-              className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-blue-500 text-white"
+              className="w-full px-4 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-foreground"
             />
           </div>
 
@@ -461,7 +461,7 @@ export default function OrderPlacementModal({
             <button
               onClick={handleConfirm}
               disabled={isTransferring || isSubmitting || !clobClient}
-              className="btn w-full bg-green-600 py-3 text-white hover:bg-green-500 active:bg-green-700"
+              className="btn w-full border border-success/30 bg-success/10 py-3 text-success hover:bg-success/15"
             >
               {isTransferring || isSubmitting
                 ? `${t("processing")}...`
@@ -472,7 +472,7 @@ export default function OrderPlacementModal({
             </button>
           )}
 
-          <p className="text-xs text-yellow-400 mt-3 text-center">
+          <p className="text-xs text-warning mt-3 text-center">
             {t("polygonUsdcWarning")}
           </p>
         </div>

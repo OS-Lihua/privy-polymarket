@@ -39,19 +39,16 @@ export default function TradingSession({
   }
 
   return (
-    <div
-      className="bg-white/5 backdrop-blur-md rounded-lg p-6 border border-white/10"
-      data-tour="session"
-    >
+    <div className="rounded-lg border border-border bg-card p-5 shadow-sm" data-tour="session">
       <SessionStatus isComplete={isComplete} />
       <SessionInfo isComplete={isComplete} />
       <SessionProgress currentStep={currentStep} />
       {isComplete && session && <SessionSuccess session={session} />}
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded p-4 mb-4">
-          <p className="text-sm text-red-300 font-medium mb-2">{t("error")}</p>
-          <pre className="text-xs text-red-400 whitespace-pre-wrap">
+        <div className="mb-4 rounded-lg border border-destructive/25 bg-destructive/10 p-4">
+          <p className="text-sm text-destructive font-medium mb-2">{t("error")}</p>
+          <pre className="text-xs text-destructive whitespace-pre-wrap">
             {error.message}
           </pre>
         </div>

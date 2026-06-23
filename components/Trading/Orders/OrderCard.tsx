@@ -4,6 +4,7 @@ import type { PolymarketOrder } from "@/hooks/useActiveOrders";
 import Card from "@/components/shared/Card";
 import Badge from "@/components/shared/Badge";
 import StatDisplay from "@/components/shared/StatDisplay";
+import { Button } from "@/components/ui/button";
 
 import { QUERY_STALE_TIMES } from "@/constants/query";
 import { formatPrice, formatCurrency, formatShares } from "@/utils/formatting";
@@ -64,13 +65,13 @@ export default function OrderCard({
                 {marketInfo.question || "Market"}
               </h4>
               {getOutcome() && (
-                <div className="text-sm text-blue-400 font-medium">
+                <div className="text-sm text-primary font-medium">
                   {getOutcome()}
                 </div>
               )}
             </>
           ) : (
-            <div className="text-sm text-gray-400">Loading...</div>
+            <div className="text-sm text-muted-foreground">Loading...</div>
           )}
         </div>
 
@@ -80,32 +81,34 @@ export default function OrderCard({
       </div>
 
       {/* Order Details Grid */}
-      <div className="grid grid-cols-3 gap-3 p-3 bg-white/5 rounded-lg">
+      <div className="grid grid-cols-3 gap-3 rounded-lg border border-border bg-panel p-3">
         <StatDisplay label="Price" value={formatPrice(price)} />
         <StatDisplay label="Shares" value={formatShares(shares, 0)} />
         <StatDisplay label="Total" value={formatCurrency(totalValue)} />
       </div>
 
       {/* Order ID */}
-      <div className="mt-3 p-2 bg-white/5 rounded text-xs font-mono">
-        <span className="text-gray-400">ID:</span> {order.id.slice(0, 16)}...
+      <div className="mt-3 rounded-md border border-border bg-panel p-2 text-xs font-mono">
+        <span className="text-muted-foreground">ID:</span> {order.id.slice(0, 16)}...
       </div>
 
       {/* Created At Timestamp */}
       {order.created_at && (
-        <div className="mt-2 text-xs text-gray-400">
+        <div className="mt-2 text-xs text-muted-foreground">
           {new Date(order.created_at * 1000).toLocaleString()}
         </div>
       )}
 
       {/* Cancel Order Button */}
-      <button
+      <Button
         onClick={() => onCancel(order.id)}
         disabled={isCancelling || isSubmitting}
-        className="mt-3 w-full py-2 bg-red-600/20 hover:bg-red-600/30 disabled:bg-gray-600/20 disabled:cursor-not-allowed text-red-400 disabled:text-gray-500 font-medium rounded-lg transition-colors border border-red-500/30 disabled:border-gray-500/30"
+        variant="destructive"
+        loading={isCancelling}
+        className="mt-3 w-full"
       >
         {isCancelling ? "Cancelling..." : "Cancel Order"}
-      </button>
+      </Button>
     </Card>
   );
 }

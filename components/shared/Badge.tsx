@@ -9,10 +9,10 @@ interface BadgeProps {
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
-  buy: "bg-green-500/20 text-green-400 border border-green-500/30",
-  sell: "bg-red-500/20 text-red-400 border border-red-500/30",
-  closed: "bg-red-500/20 text-red-400",
-  default: "bg-blue-500/20 text-blue-300",
+  buy: "border border-success/30 bg-success/10 text-success",
+  sell: "border border-destructive/30 bg-destructive/10 text-destructive",
+  closed: "border border-destructive/25 bg-destructive/10 text-destructive",
+  default: "border border-primary/25 bg-primary/10 text-primary",
 };
 
 export default function Badge({

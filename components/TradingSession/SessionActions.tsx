@@ -1,5 +1,6 @@
 import { SessionStep } from "@/utils/session";
 import { useI18n } from "@/lib/i18n";
+import { Button } from "@/components/ui/button";
 
 interface SessionActionsProps {
   isComplete: boolean | undefined;
@@ -18,29 +19,28 @@ export default function SessionActions({
 
   if (!isComplete) {
     return (
-      <button
+      <Button
         onClick={onInitialize}
         disabled={currentStep !== "idle"}
-        className="btn btn-primary flex-1 py-3"
+        loading={currentStep !== "idle"}
+        className="flex-1"
       >
-        {currentStep !== "idle"
-          ? `${t("initializing")}...`
-          : t("initializeSession")}
-      </button>
+        {currentStep !== "idle" ? t("initializing") : t("initializeSession")}
+      </Button>
     );
   }
 
   return (
     <>
-      <div className="flex-1 bg-green-500/10 border border-green-500/20 rounded-md px-4 py-3 flex items-center justify-center">
-        <span className="text-green-300 font-medium">{t("sessionActive")}</span>
+      <div className="flex-1 rounded-md border border-success/25 bg-success/10 px-4 py-3 flex items-center justify-center">
+        <span className="text-success font-medium">{t("sessionActive")}</span>
       </div>
-      <button
+      <Button
         onClick={onEnd}
-        className="btn btn-danger py-3"
+        variant="destructive"
       >
         {t("endSession")}
-      </button>
+      </Button>
     </>
   );
 }
