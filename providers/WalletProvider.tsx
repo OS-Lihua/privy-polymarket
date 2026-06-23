@@ -5,19 +5,18 @@ import {
   createWalletClient,
   createPublicClient,
   custom,
-  http,
   type WalletClient,
 } from "viem";
 import { providers } from "ethers";
-import { addRpcUrlOverrideToChain } from "@privy-io/chains";
 import { PrivyProvider, useWallets, usePrivy } from "@privy-io/react-auth";
-import { POLYGON_RPC_URL } from "@/constants/polymarket";
 import { polygon } from "viem/chains";
 import { WalletContext } from "@/providers/WalletContext";
+import { polygonTransport } from "@/utils/polygonTransport";
+import { polygonChainWithRpc } from "@/utils/polygonChain";
 
 const publicClient = createPublicClient({
   chain: polygon,
-  transport: http(POLYGON_RPC_URL),
+  transport: polygonTransport(),
 });
 
 function WalletContextProvider({ children }: { children: ReactNode }) {
@@ -102,9 +101,7 @@ export default function Provider({ children }: { children: ReactNode }) {
       appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID as string}
       config={{
         defaultChain: polygon,
-        supportedChains: [
-          addRpcUrlOverrideToChain(polygon, POLYGON_RPC_URL as string),
-        ],
+        supportedChains: [polygonChainWithRpc()],
         embeddedWallets: {
           ethereum: {
             createOnLogin: "users-without-wallets",

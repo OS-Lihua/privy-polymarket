@@ -27,7 +27,11 @@ export default function useTradingSession() {
   );
 
   const { eoaAddress, walletClient } = useWallet();
-  const { createOrDeriveUserApiCredentials } = useUserApiCredentials();
+  const {
+    createOrDeriveUserApiCredentials,
+    createAndStoreBuilderCredentials,
+    hasStoredBuilderCredentials,
+  } = useUserApiCredentials();
   const { checkAllTokenApprovals, setAllTokenApprovals } = useTokenApprovals();
   const { derivedSafeAddressFromEoa, isSafeDeployed, deploySafe } =
     useSafeDeployment(eoaAddress);
@@ -82,28 +86,45 @@ export default function useTradingSession() {
     setSessionError(null);
 
     try {
-      // Step 1: Initializes relayClient with the ethers signer and
-      // Builder's credentials (via remote signing server) for authentication
+      // Step 1: Get User API Credentials (derive or create), then use them to
+      // create Builder credentials and store them encrypted on the server.
+      let apiCreds = tradingSession?.apiCredentials;
+      if (
+        !tradingSession?.hasApiCredentials ||
+        !apiCreds ||
+        !apiCreds.key ||
+        !apiCreds.secret ||
+        !apiCreds.passphrase
+      ) {
+        setCurrentStep("credentials");
+        apiCreds = await createOrDeriveUserApiCredentials();
+      }
+      if (!(await hasStoredBuilderCredentials())) {
+        await createAndStoreBuilderCredentials(apiCreds);
+      }
+
+      // Step 2: Initializes relayClient with the ethers signer and
+      // per-user Builder credentials (via remote signing server).
       const initializedRelayClient = await initializeRelayClient();
 
-      // Step 2: Get Safe address (deterministic derivation from EOA)
+      // Step 3: Get Safe address (deterministic derivation from EOA)
       if (!derivedSafeAddressFromEoa) {
         throw new Error("Failed to derive Safe address");
       }
 
-      // Step 3: Check if Safe is deployed
+      // Step 4: Check if Safe is deployed
       const isDeployed = await isSafeDeployed(
         initializedRelayClient,
         derivedSafeAddressFromEoa
       );
 
-      // Step 4: Deploy Safe if not already deployed
+      // Step 5: Deploy Safe if not already deployed
       if (!isDeployed) {
         setCurrentStep("deploying");
         await deploySafe(initializedRelayClient);
       }
 
-      // Step 5: Get User API Credentials (derive or create)
+      // Step 6: Set up Deposit Wallet
       setCurrentStep("depositWallet");
       const depositWalletAddress =
         (await initializedRelayClient.deriveDepositWalletAddress()) ||
@@ -117,20 +138,6 @@ export default function useTradingSession() {
         await isDepositWalletDeployed(depositWalletAddress);
       if (!depositWalletDeployed) {
         await deployDepositWallet(initializedRelayClient);
-      }
-
-      // Step 6: Get User API Credentials (derive or create)
-      // and store them in the trading session object
-      let apiCreds = tradingSession?.apiCredentials;
-      if (
-        !tradingSession?.hasApiCredentials ||
-        !apiCreds ||
-        !apiCreds.key ||
-        !apiCreds.secret ||
-        !apiCreds.passphrase
-      ) {
-        setCurrentStep("credentials");
-        apiCreds = await createOrDeriveUserApiCredentials();
       }
 
       // Step 7: Set all required token approvals for trading
@@ -181,6 +188,8 @@ export default function useTradingSession() {
     initializeRelayClient,
     tradingSession,
     createOrDeriveUserApiCredentials,
+    createAndStoreBuilderCredentials,
+    hasStoredBuilderCredentials,
     checkAllTokenApprovals,
     setAllTokenApprovals,
     deriveDepositWalletAddress,

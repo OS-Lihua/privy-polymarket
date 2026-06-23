@@ -1,43 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  BuilderApiKeyCreds,
-  buildHmacSignature,
-} from "@polymarket/builder-signing-sdk";
-
-const BUILDER_CREDENTIALS: BuilderApiKeyCreds = {
-  key:
-    process.env.POLY_BUILDER_API_KEY ||
-    process.env.POLYMARKET_BUILDER_API_KEY ||
-    "",
-  secret:
-    process.env.POLY_BUILDER_SECRET ||
-    process.env.POLYMARKET_BUILDER_SECRET ||
-    "",
-  passphrase:
-    process.env.POLY_BUILDER_PASSPHRASE ||
-    process.env.POLYMARKET_BUILDER_PASSPHRASE ||
-    "",
-};
+import { buildHmacSignature } from "@polymarket/builder-signing-sdk";
+import { requirePrivyAuth } from "@/lib/server/auth";
+import { getUserBuilderCredentials } from "@/lib/server/builder-credentials";
 
 // This route is used to sign messages for builder authentication (RelayClient) or order attribution (ClobClient)
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requirePrivyAuth(request);
+    const builderCredentials = await getUserBuilderCredentials(auth.privyUserId);
     const body = await request.json();
     const { method, path, body: requestBody } = body;
 
-    if (
-      !BUILDER_CREDENTIALS.key ||
-      !BUILDER_CREDENTIALS.secret ||
-      !BUILDER_CREDENTIALS.passphrase
-    ) {
+    if (!builderCredentials) {
       return NextResponse.json(
-        { error: "Builder credentials not configured" },
-        { status: 500 }
+        { error: "Builder credentials not configured for this user" },
+        { status: 401 }
       );
     }
 
-    if (!method || !path || !requestBody) {
+    if (!method || !path) {
       return NextResponse.json(
         { error: "Missing required parameters: method, path" },
         { status: 400 }
@@ -47,7 +29,7 @@ export async function POST(request: NextRequest) {
     const sigTimestamp = Date.now().toString();
 
     const signature = buildHmacSignature(
-      BUILDER_CREDENTIALS.secret,
+      builderCredentials.secret,
       parseInt(sigTimestamp),
       method,
       path,
@@ -57,8 +39,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       POLY_BUILDER_SIGNATURE: signature,
       POLY_BUILDER_TIMESTAMP: sigTimestamp,
-      POLY_BUILDER_API_KEY: BUILDER_CREDENTIALS.key,
-      POLY_BUILDER_PASSPHRASE: BUILDER_CREDENTIALS.passphrase,
+      POLY_BUILDER_API_KEY: builderCredentials.key,
+      POLY_BUILDER_PASSPHRASE: builderCredentials.passphrase,
     });
   } catch (error) {
     console.error("Signing error:", error);

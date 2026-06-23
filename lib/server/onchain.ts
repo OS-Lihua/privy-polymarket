@@ -3,11 +3,11 @@ import {
   decodeEventLog,
   erc20Abi,
   getAddress,
-  http,
   type Hex,
 } from "viem";
 import { polygon } from "viem/chains";
-import { getPolygonRpcUrl, PUSD_ADDRESS } from "@/lib/server/config";
+import { PUSD_ADDRESS } from "@/lib/server/config";
+import { serverPolygonTransport } from "@/lib/server/polygonTransport";
 
 export type TransferVerificationInput = {
   txHash: Hex;
@@ -94,6 +94,6 @@ export async function verifyUsdcTransfer(input: TransferVerificationInput) {
 function polygonClient() {
   return createPublicClient({
     chain: polygon,
-    transport: http(getPolygonRpcUrl()),
+    transport: serverPolygonTransport(),
   });
 }

@@ -1,14 +1,25 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { requirePrivyAuth } from "@/lib/server/auth";
+import { getUserBuilderCredentials } from "@/lib/server/builder-credentials";
 
-export async function GET() {
-  const configured = Boolean(
-    (process.env.POLY_BUILDER_API_KEY ||
-      process.env.POLYMARKET_BUILDER_API_KEY) &&
-      (process.env.POLY_BUILDER_SECRET ||
-        process.env.POLYMARKET_BUILDER_SECRET) &&
-      (process.env.POLY_BUILDER_PASSPHRASE ||
-        process.env.POLYMARKET_BUILDER_PASSPHRASE)
-  );
+export async function GET(request: NextRequest) {
+  try {
+    const auth = await requirePrivyAuth(request);
+    const configured = Boolean(
+      await getUserBuilderCredentials(auth.privyUserId)
+    );
 
-  return NextResponse.json({ configured });
+    return NextResponse.json({ configured });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        configured: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to check builder credentials",
+      },
+      { status: 401 }
+    );
+  }
 }

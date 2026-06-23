@@ -55,3 +55,16 @@ model TradeAttempt {
   @@index([feeTxHash])
   @@index([polymarketOrderId])
 }
+
+model UserBuilderCredential {
+  id                         String   @id @default(cuid())
+  privyUserId                String   @unique
+  eoaAddress                 String
+  keyCiphertext              String
+  secretCiphertext           String
+  passphraseCiphertext       String
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+
+  @@index([eoaAddress])
+}

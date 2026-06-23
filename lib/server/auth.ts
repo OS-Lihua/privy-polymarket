@@ -3,7 +3,6 @@ import {
   createPublicClient,
   getAddress,
   isAddress,
-  http,
   zeroAddress,
 } from "viem";
 import { polygon } from "viem/chains";
@@ -14,7 +13,8 @@ import {
   deriveUupsDepositWallet,
 } from "@polymarket/builder-relayer-client/dist/builder/derive";
 import { getContractConfig } from "@polymarket/builder-relayer-client/dist/config";
-import { getPolygonRpcUrl, POLYGON_CHAIN_ID } from "@/lib/server/config";
+import { POLYGON_CHAIN_ID } from "@/lib/server/config";
+import { serverPolygonTransport } from "@/lib/server/polygonTransport";
 
 type AuthContext = {
   privyUserId: string;
@@ -138,6 +138,6 @@ async function isContractDeployed(address: string) {
 function polygonClient() {
   return createPublicClient({
     chain: polygon,
-    transport: http(getPolygonRpcUrl()),
+    transport: serverPolygonTransport(),
   });
 }

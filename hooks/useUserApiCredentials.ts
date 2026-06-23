@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { Chain, ClobClient } from "@polymarket/clob-client-v2";
+import { usePrivy } from "@privy-io/react-auth";
 import { useWallet } from "@/providers/WalletContext";
 import { CLOB_API_URL } from "@/constants/polymarket";
 
@@ -26,6 +27,7 @@ const hasCredentials = (
 
 export default function useUserApiCredentials() {
   const { eoaAddress, walletClient } = useWallet();
+  const { getAccessToken } = usePrivy();
 
   // Creates temporary clobClient with ethers signer
   const createOrDeriveUserApiCredentials =
@@ -39,25 +41,16 @@ export default function useUserApiCredentials() {
       });
 
       try {
-        // Create first. Calling derive for a wallet without an existing nonce=0
-        // key returns a noisy 400 from the SDK before we can fall back.
-        console.log("Creating new User API Credentials...");
-        const newCreds = (await tempClient.createApiKey()) as ApiKeyResponse;
-        if (hasCredentials(newCreds)) {
-          console.log("Successfully created new User API Credentials");
-          return newCreds;
-        }
-
-        console.log("Deriving existing User API Credentials...");
-        const derivedCreds =
-          (await tempClient.deriveApiKey()) as ApiKeyResponse;
-        if (hasCredentials(derivedCreds)) {
-          console.log("Successfully derived existing User API Credentials");
-          return derivedCreds;
+        console.log("Creating or deriving User API Credentials...");
+        const credentials =
+          (await tempClient.createOrDeriveApiKey()) as ApiKeyResponse;
+        if (hasCredentials(credentials)) {
+          console.log("Successfully prepared User API Credentials");
+          return credentials;
         }
 
         throw new Error(
-          String(newCreds.error || derivedCreds.error || "Failed to get API credentials")
+          String(credentials.error || "Failed to get API credentials")
         );
       } catch (err) {
         console.error("Failed to get credentials:", err);
@@ -65,5 +58,79 @@ export default function useUserApiCredentials() {
       }
     }, [eoaAddress, walletClient]);
 
-  return { createOrDeriveUserApiCredentials };
+  const createAndStoreBuilderCredentials = useCallback(
+    async (apiCredentials: UserApiCredentials) => {
+      if (!eoaAddress || !walletClient) throw new Error("Wallet not connected");
+
+      const client = new ClobClient({
+        host: CLOB_API_URL,
+        chain: Chain.POLYGON,
+        signer: walletClient,
+        creds: apiCredentials,
+      });
+      const builderCreds =
+        (await client.createBuilderApiKey()) as ApiKeyResponse;
+
+      if (!hasCredentials(builderCreds)) {
+        throw new Error(
+          String(builderCreds.error || "Failed to create builder credentials")
+        );
+      }
+
+      const token = await getAccessToken();
+      if (!token) throw new Error("Missing Privy access token");
+
+      const response = await fetch("/api/polymarket/builder-credentials", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          eoaAddress,
+          builderCreds,
+        }),
+      });
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(
+          typeof body.error === "string"
+            ? body.error
+            : "Failed to save builder credentials"
+        );
+      }
+
+      return builderCreds;
+    },
+    [eoaAddress, getAccessToken, walletClient]
+  );
+
+  const hasStoredBuilderCredentials = useCallback(async () => {
+    const token = await getAccessToken();
+    if (!token) throw new Error("Missing Privy access token");
+
+    const response = await fetch("/api/polymarket/sign/status", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const body = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        typeof body.error === "string"
+          ? body.error
+          : "Failed to check builder credentials"
+      );
+    }
+
+    return Boolean(body.configured);
+  }, [getAccessToken]);
+
+  return {
+    createOrDeriveUserApiCredentials,
+    createAndStoreBuilderCredentials,
+    hasStoredBuilderCredentials,
+  };
 }

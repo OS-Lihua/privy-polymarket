@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { usePrivy } from "@privy-io/react-auth";
 import { useWallet } from "@/providers/WalletContext";
 import { BuilderConfig } from "@polymarket/builder-signing-sdk";
 import {
@@ -11,12 +12,16 @@ import {
   POLYGON_CHAIN_ID,
   REMOTE_SIGNING_URL,
 } from "@/constants/polymarket";
+import type { Chain } from "viem";
+import { polygonChainWithRpc } from "@/utils/polygonChain";
 
 type RelayClientConstructor = new (
   relayerUrl: string,
   chainId: number,
   signer: NonNullable<ReturnType<typeof useWallet>["ethersSigner"]>,
-  builderConfig: BuilderConfig
+  builderConfig: BuilderConfig,
+  relayTxType?: undefined,
+  options?: { chain: Chain }
 ) => RelayClientInstance;
 
 // This hook is responsible for creating and managing the relay client instance
@@ -25,6 +30,7 @@ type RelayClientConstructor = new (
 export default function useRelayClient() {
   const [relayClient, setRelayClient] = useState<RelayClient | null>(null);
   const { eoaAddress, ethersSigner } = useWallet();
+  const { getAccessToken } = usePrivy();
 
   // This function initializes the relay client with
   // the user's signer and builder config
@@ -33,14 +39,8 @@ export default function useRelayClient() {
       throw new Error("Wallet not connected");
     }
 
-    const builderStatus = await fetch("/api/polymarket/sign/status");
-    const builderStatusBody = await builderStatus.json();
-
-    if (!builderStatus.ok || !builderStatusBody.configured) {
-      throw new Error(
-        "Polymarket builder credentials are not configured. Set POLY_BUILDER_API_KEY, POLY_BUILDER_SECRET, and POLY_BUILDER_PASSPHRASE in .env.local."
-      );
-    }
+    const token = await getAccessToken();
+    if (!token) throw new Error("Missing Privy access token");
 
     // The Builder's credentials are obtained from 'polymarket.com/settings?tab=builder'
     // A remote signing server allows the builder credentials to be kept secure while signing requests
@@ -48,6 +48,7 @@ export default function useRelayClient() {
     const builderConfig = new BuilderConfig({
       remoteBuilderConfig: {
         url: REMOTE_SIGNING_URL(),
+        token,
       },
     });
 
@@ -64,12 +65,14 @@ export default function useRelayClient() {
       RELAYER_URL,
       POLYGON_CHAIN_ID,
       ethersSigner,
-      builderConfig
+      builderConfig,
+      undefined,
+      { chain: polygonChainWithRpc() }
     );
 
     setRelayClient(client);
     return client;
-  }, [eoaAddress, ethersSigner]);
+  }, [eoaAddress, ethersSigner, getAccessToken]);
 
   // This function clears the relay client and resets the state
   const clearRelayClient = useCallback(() => {

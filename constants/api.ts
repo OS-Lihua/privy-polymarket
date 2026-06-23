@@ -8,7 +8,13 @@ export const POLYMARKET_PROFILE_URL = (address: string) =>
 
 // RPC
 export const POLYGON_RPC_URL =
-  process.env.NEXT_PUBLIC_POLYGON_RPC_URL || "https://polygon.drpc.org";
+  process.env.NEXT_PUBLIC_POLYGON_RPC_URL || "https://polygon-rpc.com";
+export const POLYGON_FALLBACK_RPC_URLS = [
+  "https://polygon-rpc.com",
+  "https://rpc.ankr.com/polygon",
+  "https://polygon-bor-rpc.publicnode.com",
+  "https://polygon.drpc.org",
+] as const;
 
 // Remote signing endpoint
 export const REMOTE_SIGNING_URL = () =>
