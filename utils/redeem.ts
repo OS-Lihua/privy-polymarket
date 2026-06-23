@@ -1,12 +1,12 @@
 import type { DepositWalletCall } from "@polymarket/builder-relayer-client";
 import { encodeFunctionData } from "viem";
 import {
-	USDC_E_CONTRACT_ADDRESS,
-	CTF_CONTRACT_ADDRESS,
-	NEG_RISK_ADAPTER_ADDRESS,
+	CTF_COLLATERAL_ADAPTER_ADDRESS,
+	NEG_RISK_CTF_COLLATERAL_ADAPTER_ADDRESS,
+	PUSD_CONTRACT_ADDRESS,
 } from "@/constants/tokens";
 
-const ctfAbi = [
+const ctfCollateralAdapterAbi = [
 	{
 		inputs: [
 			{ name: "collateralToken", type: "address" },
@@ -57,7 +57,7 @@ export const createRedeemCall = (params: RedeemParams): DepositWalletCall => {
 		});
 
 		return {
-			target: NEG_RISK_ADAPTER_ADDRESS,
+			target: NEG_RISK_CTF_COLLATERAL_ADAPTER_ADDRESS,
 			data,
 			value: "0",
 		};
@@ -68,10 +68,10 @@ export const createRedeemCall = (params: RedeemParams): DepositWalletCall => {
 	const indexSet = BigInt(1 << outcomeIndex);
 
 	const data = encodeFunctionData({
-		abi: ctfAbi,
+		abi: ctfCollateralAdapterAbi,
 		functionName: "redeemPositions",
 		args: [
-			USDC_E_CONTRACT_ADDRESS as `0x${string}`,
+			PUSD_CONTRACT_ADDRESS as `0x${string}`,
 			parentCollectionId as `0x${string}`,
 			conditionId as `0x${string}`,
 			[indexSet],
@@ -79,7 +79,7 @@ export const createRedeemCall = (params: RedeemParams): DepositWalletCall => {
 	});
 
 	return {
-		target: CTF_CONTRACT_ADDRESS,
+		target: CTF_COLLATERAL_ADAPTER_ADDRESS,
 		data,
 		value: "0",
 	};

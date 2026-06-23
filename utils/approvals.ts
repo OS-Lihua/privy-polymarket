@@ -5,8 +5,10 @@ import {
 	PUSD_CONTRACT_ADDRESS,
 	CTF_CONTRACT_ADDRESS,
 	CTF_EXCHANGE_V2_ADDRESS,
+	CTF_COLLATERAL_ADAPTER_ADDRESS,
 	NEG_RISK_CTF_EXCHANGE_V2_ADDRESS,
 	NEG_RISK_ADAPTER_ADDRESS,
+	NEG_RISK_CTF_COLLATERAL_ADAPTER_ADDRESS,
 } from "@/constants/tokens";
 import { polygonTransport } from "@/utils/polygonTransport";
 
@@ -50,12 +52,22 @@ const PUSD_SPENDERS = [
 		name: "Neg Risk CTF Exchange V2",
 	},
 	{ address: NEG_RISK_ADAPTER_ADDRESS, name: "Neg Risk Adapter" },
+	{ address: CTF_COLLATERAL_ADAPTER_ADDRESS, name: "CTF Collateral Adapter" },
+	{
+		address: NEG_RISK_CTF_COLLATERAL_ADAPTER_ADDRESS,
+		name: "Neg Risk CTF Collateral Adapter",
+	},
 ] as const;
 
 const OUTCOME_TOKEN_SPENDERS = [
 	{ address: CTF_EXCHANGE_V2_ADDRESS, name: "CTF Exchange V2" },
 	{ address: NEG_RISK_CTF_EXCHANGE_V2_ADDRESS, name: "Neg Risk Exchange V2" },
 	{ address: NEG_RISK_ADAPTER_ADDRESS, name: "Neg Risk Adapter" },
+	{ address: CTF_COLLATERAL_ADAPTER_ADDRESS, name: "CTF Collateral Adapter" },
+	{
+		address: NEG_RISK_CTF_COLLATERAL_ADAPTER_ADDRESS,
+		name: "Neg Risk CTF Collateral Adapter",
+	},
 ] as const;
 
 const checkPusdApprovalForSpender = async (
